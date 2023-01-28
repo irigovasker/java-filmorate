@@ -7,7 +7,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.util.CustomValidateException;
-import ru.yandex.practicum.filmorate.util.CustomValidateResponse;
 import ru.yandex.practicum.filmorate.util.ErrorsUtil;
 import ru.yandex.practicum.filmorate.util.Validator;
 
@@ -64,7 +63,7 @@ public class UserController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<CustomValidateResponse> handleException(CustomValidateException e) {
-        return new ResponseEntity<>(new CustomValidateResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    private ResponseEntity<String> handleException(CustomValidateException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -7,7 +7,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.util.CustomValidateException;
-import ru.yandex.practicum.filmorate.util.CustomValidateResponse;
 import ru.yandex.practicum.filmorate.util.ErrorsUtil;
 import ru.yandex.practicum.filmorate.util.Validator;
 
@@ -36,7 +35,7 @@ public class FilmController {
     }
 
     @PostMapping
-    public Film createUser(@Valid @RequestBody Film film, BindingResult bindingResult) {
+    public Film createFilm(@Valid @RequestBody Film film, BindingResult bindingResult) {
         Validator.validateFilm(film);
         if (bindingResult.hasErrors()) {
             ErrorsUtil.returnErrorsToClient(bindingResult);
@@ -49,7 +48,7 @@ public class FilmController {
     }
 
     @PutMapping
-    public Film updateUser(@Valid @RequestBody Film film, BindingResult bindingResult) {
+    public Film updateFilm(@Valid @RequestBody Film film, BindingResult bindingResult) {
         if (films.containsKey(film.getId())) {
             films.put(film.getId(), film);
         } else {
@@ -64,7 +63,7 @@ public class FilmController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<CustomValidateResponse> handleException(CustomValidateException e) {
-        return new ResponseEntity<>(new CustomValidateResponse(e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+    private ResponseEntity<String> handleException(CustomValidateException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
