@@ -63,7 +63,8 @@ public class FilmController {
     }
 
     @ExceptionHandler
-    private ResponseEntity<String> handleException(CustomValidateException e) {
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
+    private CustomValidateException handleException(CustomValidateException e) {
+        return e;
     }
 }
