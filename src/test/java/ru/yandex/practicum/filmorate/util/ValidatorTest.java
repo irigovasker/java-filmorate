@@ -2,8 +2,8 @@ package ru.yandex.practicum.filmorate.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.models.Film;
+import ru.yandex.practicum.filmorate.models.User;
 
 import java.time.LocalDate;
 

@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.models;
 
 import lombok.Data;
 
@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -20,4 +21,5 @@ public class Film {
     private LocalDate releaseDate;
     @Min(value = 0, message = "Duration cannot be negative")
     private int duration;
+    private Set<Integer> likedUsers;
 }

@@ -1,5 +1,5 @@
 package ru.yandex.practicum.filmorate;
-//Привет. Все тесты делал в постмане которые дали в ТЗ, этого же хватит?
+//Привет. Реализовал тз
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

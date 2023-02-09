@@ -1,35 +1,40 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.util.CustomValidateException;
+import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.util.ErrorsUtil;
 import ru.yandex.practicum.filmorate.util.Validator;
 
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private Map<Integer, User> users;
-    private int counter;
+    private final UserService userService;
 
-    public UserController() {
-        users = new HashMap<>();
-        counter = 1;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping
     public List<User> getUsers() {
-        return new ArrayList<>(users.values());
+        return userService.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable int id) {
+        return userService.getUserById(id);
     }
 
     @PostMapping
@@ -41,29 +46,43 @@ public class UserController {
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }
-        user.setId(counter);
-        users.put(counter, user);
-        counter++;
-        return user;
+        return userService.createUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user, BindingResult bindingResult) {
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-        } else {
-            throw new CustomValidateException("Такого объекта нет");
-        }
         Validator.validateUser(user);
         if (bindingResult.hasErrors()) {
             ErrorsUtil.returnErrorsToClient(bindingResult);
         }
-        return user;
+        return userService.updateUser(user);
     }
 
-    @ExceptionHandler
-    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
-    private CustomValidateException handleException(CustomValidateException e) {
-        return e;
+    @PutMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<Map<String, String>> addFriend(@PathVariable int id, @PathVariable int friendId) {
+        if (userService.addFriend(id, friendId)) {
+            return new ResponseEntity<>(Map.of("Пользователи стали друзьями", id + "," + friendId), HttpStatus.OK);
+        } else {
+            throw new RuntimeException("Неизвестная ошибка");
+        }
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public ResponseEntity<Map<String, String>> deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        if (userService.removeFriend(id, friendId)) {
+            return new ResponseEntity<>(Map.of("Пользователи больше не друзья", id + "," + friendId), HttpStatus.OK);
+        } else {
+            throw new RuntimeException("Неизвестная ошибка");
+        }
+    }
+
+    @GetMapping("/{id}/friends")
+    public ResponseEntity<List<User>> getUsersFriends(@PathVariable int id) {
+        return new ResponseEntity<>(userService.getUserFriends(id), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public ResponseEntity<List<User>> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return new ResponseEntity<>(userService.getCommonFriend(id, otherId), HttpStatus.OK);
     }
 }
