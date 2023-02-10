@@ -39,30 +39,28 @@ public class UserService {
         return userStorage.updateUser(user);
     }
 
-    public boolean addFriend(int userId, int possibleFriend) {
+    public void addFriend(int userId, int possibleFriend) {
         User user = getUserById(userId);
         User possible = getUserById(possibleFriend);
 
         if (user != null && possible != null) {
-            if (user.getFriends().contains(possibleFriend)) {
-                return true;
-            } else {
+            if (!user.getFriends().contains(possibleFriend)) {
                 possible.getFriends().add(userId);
-                return user.getFriends().add(possibleFriend);
+                user.getFriends().add(possibleFriend);
             }
         } else {
             throw new ObjectNotFoundException("Несуществующий пользователь");
         }
     }
 
-    public boolean removeFriend(int userId, int friendToDelete) {
+    public void removeFriend(int userId, int friendToDelete) {
         User user = getUserById(userId);
         User userToDelete = getUserById(friendToDelete);
 
         if (user != null && userToDelete != null) {
             if (user.getFriends().contains(friendToDelete)) {
                 user.getFriends().remove(friendToDelete);
-                return userToDelete.getFriends().remove(userId);
+                userToDelete.getFriends().remove(userId);
             } else {
                 throw new RuntimeException("Пользователи не друзья");
             }

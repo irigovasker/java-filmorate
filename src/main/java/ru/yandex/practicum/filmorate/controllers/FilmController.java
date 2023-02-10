@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.models.Film;
@@ -59,21 +57,13 @@ public class FilmController {
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public ResponseEntity<List<String>> likeFilm(@PathVariable int id, @PathVariable int userId) {
-        if (filmService.likeFilm(id, userId)) {
-            return new ResponseEntity<>(List.of("OK"), HttpStatus.OK);
-        } else {
-            throw new RuntimeException("Неизвестная ошибка");
-        }
+    public void likeFilm(@PathVariable int id, @PathVariable int userId) {
+        filmService.likeFilm(id, userId);
     }
 
     @DeleteMapping("/{id}/like/{userId}")
-    public ResponseEntity<List<String>> removeLike(@PathVariable int id, @PathVariable int userId) {
-        if (filmService.removeLike(id, userId)) {
-            return new ResponseEntity<>(List.of("OK"), HttpStatus.OK);
-        } else {
-            throw new RuntimeException("Неизвестная ошибка");
-        }
+    public void removeLike(@PathVariable int id, @PathVariable int userId) {
+        filmService.removeLike(id, userId);
     }
 
     @GetMapping("/popular")

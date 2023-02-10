@@ -59,21 +59,13 @@ public class UserController {
     }
 
     @PutMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<Map<String, String>> addFriend(@PathVariable int id, @PathVariable int friendId) {
-        if (userService.addFriend(id, friendId)) {
-            return new ResponseEntity<>(Map.of("Пользователи стали друзьями", id + "," + friendId), HttpStatus.OK);
-        } else {
-            throw new RuntimeException("Неизвестная ошибка");
-        }
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.addFriend(id, friendId);
     }
 
     @DeleteMapping("/{id}/friends/{friendId}")
-    public ResponseEntity<Map<String, String>> deleteFriend(@PathVariable int id, @PathVariable int friendId) {
-        if (userService.removeFriend(id, friendId)) {
-            return new ResponseEntity<>(Map.of("Пользователи больше не друзья", id + "," + friendId), HttpStatus.OK);
-        } else {
-            throw new RuntimeException("Неизвестная ошибка");
-        }
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.removeFriend(id, friendId);
     }
 
     @GetMapping("/{id}/friends")

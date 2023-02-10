@@ -41,28 +41,24 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public boolean likeFilm(int filmId, int userId) {
+    public void likeFilm(int filmId, int userId) {
         Film film = getFilmById(filmId);
         User user = userStorage.getUserById(userId).orElse(null);
 
         if (film != null && user != null) {
-            if (film.getLikedUsers().contains(userId)) {
-                return true;
-            } else {
-                return film.getLikedUsers().add(userId);
-            }
+            film.getLikedUsers().add(userId);
         } else {
             throw new ObjectNotFoundException("Несуществующий фильм");
         }
     }
 
-    public boolean removeLike(int filmId, int userId) {
+    public void removeLike(int filmId, int userId) {
         Film film = getFilmById(filmId);
         User user = userStorage.getUserById(userId).orElse(null);
 
         if (film != null && user != null) {
             if (film.getLikedUsers().contains(userId)) {
-                return film.getLikedUsers().remove(userId);
+                film.getLikedUsers().remove(userId);
             } else {
                 throw new RuntimeException("Несуществующий лайк");
             }
