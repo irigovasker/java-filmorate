@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.util.CustomValidateException;
@@ -8,10 +7,14 @@ import ru.yandex.practicum.filmorate.util.CustomValidateException;
 import java.util.*;
 
 @Component
-@RequiredArgsConstructor()
 public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users;
     private int counter;
+
+    public InMemoryUserStorage(Map<Integer, User> users) {
+        this.users = users;
+        counter = 1;
+    }
 
 
     @Override
@@ -21,13 +24,13 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        user.setId(++counter);
+        user.setId(counter);
         if (user.getName() == "") {
             user.setName(user.getLogin());
         }
         user.setFriends(new HashSet<>());
         users.put(counter, user);
-        return users.get(counter);
+        return users.get(counter++);
     }
 
     @Override

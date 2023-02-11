@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.util.CustomValidateException;
@@ -8,10 +7,14 @@ import ru.yandex.practicum.filmorate.util.CustomValidateException;
 import java.util.*;
 
 @Component
-@RequiredArgsConstructor
 public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films;
     private int counter;
+
+    public InMemoryFilmStorage(Map<Integer, Film> films) {
+        this.films = films;
+        counter = 1;
+    }
 
 
     @Override
@@ -21,10 +24,10 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film createFilm(Film film) {
-        film.setId(++counter);
+        film.setId(counter);
         film.setLikedUsers(new HashSet<>());
         films.put(counter, film);
-        return films.get(counter);
+        return films.get(counter++);
     }
 
     @Override
