@@ -11,8 +11,8 @@ public class InMemoryUserStorage implements UserStorage {
     private final Map<Integer, User> users;
     private int counter;
 
-    public InMemoryUserStorage(Map<Integer, User> users) {
-        this.users = users;
+    public InMemoryUserStorage() {
+        this.users = new HashMap<>();
         counter = 1;
     }
 
@@ -25,7 +25,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User createUser(User user) {
         user.setId(counter);
-        if (user.getName() == "") {
+        if (user.getName().equals("")) {
             user.setName(user.getLogin());
         }
         user.setFriends(new HashSet<>());
@@ -47,9 +47,9 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getUserFriend(int id) {
+    public List<User> getUserFriends(int userId) {
         List<User> friends = new ArrayList<>();
-        for (Integer integer : users.get(id).getFriends()) {
+        for (Integer integer : users.get(userId).getFriends()) {
             friends.add(users.get(integer));
         }
         return friends;
@@ -61,11 +61,36 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> getUserById(int id) {
-        if (users.containsKey(id)) {
-            return Optional.of(users.get(id));
+    public Optional<User> getUserById(int userId) {
+        if (users.containsKey(userId)) {
+            return Optional.of(users.get(userId));
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<User> getSubscribers(int userId) {
+        return null;
+    }
+
+    @Override
+    public Relation getRelation(int userId, int secondUserId) {
+        return null;
+    }
+
+    @Override
+    public void addRelation(int userId, int secondUserId) {
+
+    }
+
+    @Override
+    public void changeRelationStatus(Relation relation, int statusId) {
+
+    }
+
+    @Override
+    public void removeRelation(Relation relation) {
+
     }
 }

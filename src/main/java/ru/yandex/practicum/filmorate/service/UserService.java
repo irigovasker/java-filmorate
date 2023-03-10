@@ -1,12 +1,15 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.storage.user.Relation;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -15,7 +18,7 @@ public class UserService {
     private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage userStorage) {
+    public UserService(@Qualifier("userDAO") UserStorage userStorage) {
         this.userStorage = userStorage;
     }
 
@@ -32,10 +35,16 @@ public class UserService {
     }
 
     public User createUser(User user) {
+        if (user.getName().equals("")) {
+            user.setName(user.getLogin());
+        }
         return userStorage.createUser(user);
     }
 
     public User updateUser(User user) {
+        if (userStorage.getUserById(user.getId()).isEmpty()) {
+            throw new ObjectNotFoundException("Несуществущий пользователь");
+        }
         return userStorage.updateUser(user);
     }
 
@@ -43,13 +52,32 @@ public class UserService {
         User user = getUserById(userId);
         User possible = getUserById(possibleFriend);
 
-        if (user != null && possible != null) {
-            if (!user.getFriends().contains(possibleFriend)) {
-                possible.getFriends().add(userId);
-                user.getFriends().add(possibleFriend);
-            }
-        } else {
+        if (user == null || possible == null) {
             throw new ObjectNotFoundException("Несуществующий пользователь");
+        }
+
+        Relation relation = userStorage.getRelation(userId, possibleFriend);
+        if (relation == null) {
+            userStorage.addRelation(userId, possibleFriend);
+            return;
+        }
+
+        boolean relationNotReversed = userId == relation.getFirstUser();
+        switch (relation.getStatus()) {
+            case 1:
+                if (!relationNotReversed) {
+                    userStorage.changeRelationStatus(relation, 3);
+                }
+                break;
+            case 2:
+                if (relationNotReversed) {
+                    userStorage.changeRelationStatus(relation, 3);
+                }
+                break;
+            case 3:
+                return;
+            default:
+                throw new RuntimeException();
         }
     }
 
@@ -57,40 +85,60 @@ public class UserService {
         User user = getUserById(userId);
         User userToDelete = getUserById(friendToDelete);
 
-        if (user != null && userToDelete != null) {
-            if (user.getFriends().contains(friendToDelete)) {
-                user.getFriends().remove(friendToDelete);
-                userToDelete.getFriends().remove(userId);
-            } else {
-                throw new RuntimeException("Пользователи не друзья");
-            }
-        } else {
+        if (user == null || userToDelete == null) {
             throw new ObjectNotFoundException("Несуществующий пользователь");
+        }
+
+        Relation relation = userStorage.getRelation(userId, friendToDelete);
+        if (relation == null) {
+            throw new ObjectNotFoundException("Пользователи не друзья");
+        }
+
+        boolean relationNotReversed = userId == relation.getFirstUser();
+        switch (relation.getStatus()) {
+            case 1:
+                if (relationNotReversed) {
+                    userStorage.removeRelation(relation);
+                }
+                break;
+            case 2:
+                if (!relationNotReversed) {
+                    userStorage.removeRelation(relation);
+                    return;
+                }
+                break;
+            case 3:
+                if (relationNotReversed) {
+                    userStorage.changeRelationStatus(relation, 2);
+                } else {
+                    userStorage.changeRelationStatus(relation, 1);
+                }
+            default:
+                throw new RuntimeException();
         }
     }
 
     public List<User> getCommonFriend(int userId, int secondUserId) {
-        User user = getUserById(userId);
+        User firstUser = getUserById(userId);
         User secondUser = getUserById(secondUserId);
 
-        if (user == null || secondUser == null) {
+        if (firstUser == null || secondUser == null) {
             throw new ObjectNotFoundException("Несуществующий пользователь");
         }
 
-        Set<Integer> usersFriend = user.getFriends();
-        Set<Integer> secondUsersFriend = secondUser.getFriends();
+        Set<User> usersFriend = new HashSet<>(userStorage.getUserFriends(userId));
+        Set<User> secondUsersFriends = new HashSet<>(userStorage.getUserFriends(secondUserId));
 
         List<User> result = new ArrayList<>();
-
-        for (Integer integer : usersFriend) {
-            if (secondUsersFriend.contains(integer)) {
-                result.add(getUserById(integer));
+        usersFriend.forEach(user -> {
+            if (secondUsersFriends.contains(user)) {
+                result.add(user);
             }
-        }
+        });
         return result;
     }
 
     public List<User> getUserFriends(int id) {
-        return userStorage.getUserFriend(id);
+        return userStorage.getUserFriends(id);
     }
 }

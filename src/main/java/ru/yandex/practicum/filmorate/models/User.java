@@ -9,6 +9,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Set;
 
 @Data
@@ -23,4 +24,24 @@ public class User {
     private String name;
     private LocalDate birthday;
     private Set<Integer> friends;
+    private Set<Integer> subscribers;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (id != user.id) return false;
+        if (!Objects.equals(email, user.email)) return false;
+        if (!Objects.equals(login, user.login)) return false;
+        if (!Objects.equals(name, user.name)) return false;
+        return Objects.equals(birthday, user.birthday);
+    }
+
+    @Override
+    public int hashCode() {
+        return id;
+    }
 }

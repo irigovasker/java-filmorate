@@ -11,8 +11,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films;
     private int counter;
 
-    public InMemoryFilmStorage(Map<Integer, Film> films) {
-        this.films = films;
+    public InMemoryFilmStorage() {
+        this.films = new HashMap<>();
         counter = 1;
     }
 
@@ -55,5 +55,25 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void removeFilm(int id) {
         films.remove(id);
+    }
+
+    @Override
+    public void likeFilm(int userId, int filmId) {
+
+    }
+
+    @Override
+    public void removeLike(int userId, int filmId) {
+
+    }
+
+    @Override
+    public List<Film> getMostPopularFilms() {
+        return null;
+    }
+
+    @Override
+    public List<Film> getMostPopularFilms(int size) {
+        return null;
     }
 }

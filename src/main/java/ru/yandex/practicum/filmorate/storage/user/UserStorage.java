@@ -9,10 +9,12 @@ public interface UserStorage {
     List<User> getAll();
     User createUser(User user);
     User updateUser(User user);
-
-    Optional<User> getUserById(int id);
-
-    List<User> getUserFriend(int id);
-
+    Optional<User> getUserById(int userId);
+    List<User> getUserFriends(int userId);
+    List<User> getSubscribers(int userId);
+    Relation getRelation(int userId, int secondUserId);
+    void addRelation(int userId, int secondUserId);
+    void changeRelationStatus(Relation relation, int statusId);
+    void removeRelation(Relation relation);
     void removeUser(int id);
 }

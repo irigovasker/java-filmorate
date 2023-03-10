@@ -1,6 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
@@ -16,7 +18,7 @@ public class FilmService {
     private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDAO") FilmStorage filmStorage, @Qualifier("userDAO") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -38,6 +40,9 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
+        if (filmStorage.getFilmById(film.getId()).isEmpty()) {
+            throw new ObjectNotFoundException("Несуществующий фильм");
+        }
         return filmStorage.updateFilm(film);
     }
 
@@ -46,7 +51,11 @@ public class FilmService {
         User user = userStorage.getUserById(userId).orElse(null);
 
         if (film != null && user != null) {
-            film.getLikedUsers().add(userId);
+            try {
+                filmStorage.likeFilm(userId, filmId);
+            } catch (DataAccessException e) {
+                throw new ObjectNotFoundException("Лайк уже существует");
+            }
         } else {
             throw new ObjectNotFoundException("Несуществующий фильм");
         }
@@ -57,10 +66,9 @@ public class FilmService {
         User user = userStorage.getUserById(userId).orElse(null);
 
         if (film != null && user != null) {
-            if (film.getLikedUsers().contains(userId)) {
-                film.getLikedUsers().remove(userId);
-            } else {
-                throw new RuntimeException("Несуществующий лайк");
+            try {
+                filmStorage.removeLike(userId, filmId);
+            } catch (DataAccessException ignored) {
             }
         } else {
             throw new ObjectNotFoundException("Несуществующий фильм или пользователь");
@@ -68,24 +76,10 @@ public class FilmService {
     }
 
     public List<Film> getMostPopularFilms() {
-        try {
-            return getSortedListByPopular().subList(0, 10);
-        } catch (IndexOutOfBoundsException e) {
-            return getSortedListByPopular();
-        }
+        return filmStorage.getMostPopularFilms();
     }
 
     public List<Film> getMostPopularFilms(int size) {
-        try {
-            return getSortedListByPopular().subList(0, size);
-        } catch (IndexOutOfBoundsException e) {
-            return getSortedListByPopular();
-        }
-    }
-
-    private List<Film> getSortedListByPopular() {
-        List<Film> films = getAll();
-        films.sort((film1, film2) -> film2.getLikedUsers().size() - film1.getLikedUsers().size());
-        return films;
+        return filmStorage.getMostPopularFilms(size);
     }
 }
