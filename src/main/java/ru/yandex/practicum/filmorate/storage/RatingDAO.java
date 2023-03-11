@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Rating;
+import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
 
 import java.util.List;
 
@@ -23,6 +24,6 @@ public class RatingDAO {
 
     public Rating getRatingById(int id) {
         return jdbcTemplate.query("SELECT * FROM \"rating\" WHERE id = ?", new BeanPropertyRowMapper<>(Rating.class), id)
-                .stream().findAny().orElse(null);
+                .stream().findAny().orElseThrow(() -> new ObjectNotFoundException("Несуществующий рейтинг"));
     }
 }

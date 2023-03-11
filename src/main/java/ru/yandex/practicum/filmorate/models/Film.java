@@ -1,7 +1,7 @@
 package ru.yandex.practicum.filmorate.models;
 
-import lombok.Data;
-
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 public class Film {
     private int id;
     @NotNull(message = "Name should not be empty")

@@ -71,26 +71,70 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public List<User> getSubscribers(int userId) {
-        return null;
+        List<User> list = new ArrayList<>();
+        users.get(userId).getSubscribers().forEach(integer -> list.add(users.get(integer)));
+        return list;
     }
 
     @Override
     public Relation getRelation(int userId, int secondUserId) {
-        return null;
+        Set<Integer> firstUserFriends = users.get(userId).getFriends();
+        Set<Integer> firstUserSubs = users.get(userId).getSubscribers();
+        Set<Integer> secondUserFriends = users.get(secondUserId).getFriends();
+        Set<Integer> secondUserSubs = users.get(secondUserId).getSubscribers();
+        Relation relation = new Relation();
+        relation.setSecondUser(userId);
+        relation.setSecondUser(secondUserId);
+
+        if (firstUserFriends.contains(secondUserId) && secondUserSubs.contains(userId)) {
+            relation.setSecondUser(1);
+            return relation;
+        } else if (firstUserSubs.contains(secondUserId) && secondUserFriends.contains(userId)) {
+            relation.setStatus(2);
+            return relation;
+        } else if (firstUserFriends.contains(secondUserId) && secondUserFriends.contains(userId)) {
+            relation.setStatus(3);
+            return relation;
+        } else {
+            return null;
+        }
     }
 
     @Override
     public void addRelation(int userId, int secondUserId) {
-
+        users.get(userId).getFriends().add(secondUserId);
+        users.get(secondUserId).getSubscribers().add(userId);
     }
 
     @Override
     public void changeRelationStatus(Relation relation, int statusId) {
-
+        User firstUser = users.get(relation.getFirstUser());
+        User secondUser = users.get(relation.getSecondUser());
+        if (statusId == 1) {
+            firstUser.getFriends().add(secondUser.getId());
+            firstUser.getSubscribers().remove(secondUser.getId());
+            secondUser.getFriends().remove(firstUser.getId());
+            secondUser.getSubscribers().add(firstUser.getId());
+        } else if (statusId == 2) {
+            firstUser.getFriends().remove(secondUser.getId());
+            firstUser.getSubscribers().add(secondUser.getId());
+            secondUser.getFriends().add(firstUser.getId());
+            secondUser.getSubscribers().remove(firstUser.getId());
+        } else if (statusId == 3) {
+            firstUser.getFriends().add(secondUser.getId());
+            firstUser.getSubscribers().remove(secondUser.getId());
+            secondUser.getFriends().add(firstUser.getId());
+            secondUser.getSubscribers().remove(firstUser.getId());
+        }
     }
 
     @Override
     public void removeRelation(Relation relation) {
-
+        User firstUser = users.get(relation.getFirstUser());
+        User secondUser = users.get(relation.getSecondUser());
+        firstUser.getFriends().remove(secondUser.getId());
+        firstUser.getSubscribers().remove(secondUser.getId());
+        secondUser.getFriends().remove(firstUser.getId());
+        secondUser.getSubscribers().remove(firstUser.getId());
     }
 }

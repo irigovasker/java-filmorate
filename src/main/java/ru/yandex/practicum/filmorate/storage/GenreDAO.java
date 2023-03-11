@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Genre;
+import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
 
 import java.util.List;
 
@@ -24,6 +25,6 @@ public class GenreDAO {
     public Genre getGenreById(int id) {
         return jdbcTemplate.query("SELECT * FROM \"genre\" WHERE id =?"
                         , new BeanPropertyRowMapper<>(Genre.class), id)
-                .stream().findAny().orElse(null);
+                .stream().findAny().orElseThrow(() -> new ObjectNotFoundException("Несуществующий жанр"));
     }
 }

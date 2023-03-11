@@ -28,11 +28,7 @@ public class FilmService {
     }
 
     public Film getFilmById(int id) {
-        Film film = filmStorage.getFilmById(id).orElse(null);
-        if (film == null) {
-            throw new ObjectNotFoundException("Фильм не найден");
-        }
-        return film;
+        return filmStorage.getFilmById(id).orElseThrow(() -> new ObjectNotFoundException("Несуществующий фильм"));
     }
 
     public Film createFilm(Film film) {
@@ -48,7 +44,7 @@ public class FilmService {
 
     public void likeFilm(int filmId, int userId) {
         Film film = getFilmById(filmId);
-        User user = userStorage.getUserById(userId).orElse(null);
+        User user = userStorage.getUserById(userId).orElseThrow(() -> new ObjectNotFoundException("Несуществующий пользователь"));
 
         if (film != null && user != null) {
             try {
@@ -63,7 +59,7 @@ public class FilmService {
 
     public void removeLike(int filmId, int userId) {
         Film film = getFilmById(filmId);
-        User user = userStorage.getUserById(userId).orElse(null);
+        User user = userStorage.getUserById(userId).orElseThrow(() -> new ObjectNotFoundException("Несуществующий пользователь"));
 
         if (film != null && user != null) {
             try {

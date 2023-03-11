@@ -17,6 +17,7 @@ import java.util.Optional;
 public class UserDAO implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
+    private static final String SELECT_USER = "SELECT u.id, u.email, u.login, u.name, u.birthday ";
 
     @Autowired
     public UserDAO(JdbcTemplate jdbcTemplate, DataSource dataSource) {
@@ -54,19 +55,19 @@ public class UserDAO implements UserStorage {
 
     @Override
     public Optional<User> getUserById(int userId) {
-        return jdbcTemplate.query("SELECT * FROM \"user\" WHERE id=?", new BeanPropertyRowMapper<>(User.class), userId)
+        return jdbcTemplate.query(SELECT_USER + "FROM \"user\" AS u WHERE id=?", new BeanPropertyRowMapper<>(User.class), userId)
                 .stream().findAny();
     }
 
     @Override
     public List<User> getUserFriends(int userId) {
         return jdbcTemplate.query(
-                "SELECT u.id, u.email, u.login, u.name, u.birthday " +
+                SELECT_USER +
                         "FROM \"friendship\" AS f " +
                         "LEFT JOIN \"user\" AS u ON f.SECOND_USER = u.ID " +
                         "WHERE f.FIRST_USER = ? AND (f.STATUS = 1 OR f.STATUS = 3) " +
                         "UNION " +
-                        "SELECT u.id, u.email, u.login, u.name, u.birthday " +
+                        SELECT_USER +
                         "FROM \"friendship\" AS f " +
                         "LEFT JOIN \"user\" AS u ON f.FIRST_USER = u.ID " +
                         "WHERE f.SECOND_USER = ? AND (f.STATUS = 2 OR f.STATUS = 3)",
@@ -77,12 +78,12 @@ public class UserDAO implements UserStorage {
     @Override
     public List<User> getSubscribers(int userId) {
         return jdbcTemplate.query(
-                "SELECT u.id, u.email, u.login, u.name, u.birthday " +
+                SELECT_USER +
                         "FROM \"friendship\" AS f " +
                         "LEFT JOIN \"user\" AS u ON f.SECOND_USER = u.ID " +
                         "WHERE f.FIRST_USER = ? AND f.STATUS = 2 " +
                         "UNION " +
-                        "SELECT u.id, u.email, u.login, u.name, u.birthday " +
+                        SELECT_USER +
                         "FROM \"friendship\" AS f " +
                         "LEFT JOIN \"user\" AS u ON f.FIRST_USER = u.ID " +
                         "WHERE f.SECOND_USER = ? AND f.STATUS = 1 ",
@@ -93,9 +94,9 @@ public class UserDAO implements UserStorage {
     @Override
     public Relation getRelation(int userId, int secondUserId) {
         return jdbcTemplate.query(
-                "SELECT * FROM \"friendship\" "+
-                        "WHERE (FIRST_USER = ? AND SECOND_USER = ?) OR (SECOND_USER = ? AND FIRST_USER = ?) ",
-                new BeanPropertyRowMapper<>(Relation.class), userId, secondUserId, secondUserId, userId)
+                        "SELECT * FROM \"friendship\" " +
+                                "WHERE (FIRST_USER = ? AND SECOND_USER = ?) OR (SECOND_USER = ? AND FIRST_USER = ?) ",
+                        new BeanPropertyRowMapper<>(Relation.class), userId, secondUserId, secondUserId, userId)
                 .stream().findAny().orElse(null);
     }
 

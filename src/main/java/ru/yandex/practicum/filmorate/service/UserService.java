@@ -27,11 +27,7 @@ public class UserService {
     }
 
     public User getUserById(int id) {
-        User user = userStorage.getUserById(id).orElse(null);
-        if (user == null) {
-            throw new ObjectNotFoundException("Пользователь не найден");
-        }
-        return user;
+        return userStorage.getUserById(id).orElseThrow(() -> new ObjectNotFoundException("Несуществующий пользователь"));
     }
 
     public User createUser(User user) {
@@ -49,12 +45,8 @@ public class UserService {
     }
 
     public void addFriend(int userId, int possibleFriend) {
-        User user = getUserById(userId);
-        User possible = getUserById(possibleFriend);
-
-        if (user == null || possible == null) {
-            throw new ObjectNotFoundException("Несуществующий пользователь");
-        }
+        getUserById(userId);
+        getUserById(possibleFriend);
 
         Relation relation = userStorage.getRelation(userId, possibleFriend);
         if (relation == null) {
@@ -82,12 +74,9 @@ public class UserService {
     }
 
     public void removeFriend(int userId, int friendToDelete) {
-        User user = getUserById(userId);
-        User userToDelete = getUserById(friendToDelete);
+        getUserById(userId);
+        getUserById(friendToDelete);
 
-        if (user == null || userToDelete == null) {
-            throw new ObjectNotFoundException("Несуществующий пользователь");
-        }
 
         Relation relation = userStorage.getRelation(userId, friendToDelete);
         if (relation == null) {

@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.models;
 
 
-import lombok.Data;
-
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -12,7 +12,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 public class User {
     private int id;
     @NotNull(message = "Email should not be empty")
