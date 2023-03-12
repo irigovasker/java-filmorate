@@ -2,14 +2,12 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.util.ErrorsUtil;
 import ru.yandex.practicum.filmorate.util.Validator;
-
 
 import javax.validation.Valid;
 import java.util.List;
@@ -49,9 +47,8 @@ public class FilmController {
         if (bindingResult.hasErrors()) {
             ErrorsUtil.returnErrorsToClient(bindingResult);
         }
-        Film updatedFilm = filmService.updateFilm(film);
         log.info("Обновлен фильм: " + film);
-        return updatedFilm;
+        return filmService.updateFilm(film);
     }
 
     @PutMapping("/{id}/like/{userId}")
