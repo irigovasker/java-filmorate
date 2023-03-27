@@ -11,8 +11,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     private final Map<Integer, Film> films;
     private int counter;
 
-    public InMemoryFilmStorage(Map<Integer, Film> films) {
-        this.films = films;
+    public InMemoryFilmStorage() {
+        this.films = new HashMap<>();
         counter = 1;
     }
 
@@ -55,5 +55,39 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void removeFilm(int id) {
         films.remove(id);
+    }
+
+    @Override
+    public void likeFilm(int userId, int filmId) {
+        films.get(filmId).getLikedUsers().add(userId);
+    }
+
+    @Override
+    public void removeLike(int userId, int filmId) {
+        films.get(filmId).getLikedUsers().remove(userId);
+    }
+
+    @Override
+    public List<Film> getMostPopularFilms() {
+        try {
+            return getSortedListByPopular().subList(0, 10);
+        } catch (IndexOutOfBoundsException e) {
+            return getSortedListByPopular();
+        }
+    }
+
+    @Override
+    public List<Film> getMostPopularFilms(int size) {
+        try {
+            return getSortedListByPopular().subList(0, size);
+        } catch (IndexOutOfBoundsException e) {
+            return getSortedListByPopular();
+        }
+    }
+
+    private List<Film> getSortedListByPopular() {
+        List<Film> films = getAll();
+        films.sort((film1, film2) -> film2.getLikedUsers().size() - film1.getLikedUsers().size());
+        return films;
     }
 }
