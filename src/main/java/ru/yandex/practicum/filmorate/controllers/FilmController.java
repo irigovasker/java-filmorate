@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.models.Film;
@@ -68,5 +69,11 @@ public class FilmController {
         } else {
             return filmService.getMostPopularFilms();
         }
+    }
+
+    @GetMapping("/search")
+    public List<Film> search(@RequestParam(name = "query") String query,
+                            @RequestParam(name = "by") String by) {
+        return filmService.search(query, by);
     }
 }

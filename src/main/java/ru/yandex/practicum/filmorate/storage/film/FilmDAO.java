@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -134,6 +135,27 @@ public class FilmDAO implements FilmStorage {
                         "LEFT JOIN \"film\" AS f ON fl.FILM_ID = f.ID " +
                         "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID "
                 , new FilmRowMapper(this), size);
+    }
+
+    @Override
+    public List<Film> searchByTitle(String query) {
+        String q = "%" + query + "%";
+        return jdbcTemplate.query(
+                SELECT_FILM +
+                        "FROM \"film\" AS f " +
+                        "LEFT JOIN \"rating\" r on f.RATING_ID = r.ID " +
+                        "WHERE f.name ILIKE ?"
+                , new FilmRowMapper(this), q);
+    }
+
+    @Override
+    public List<Film> searchByDirector(String query) {
+        return null;
+    }
+
+    @Override
+    public List<Film> searchByTitleDirector(String query) {
+        return null;
     }
 
     private void insertFilmGenre(int filmId, int genreId) {
