@@ -15,7 +15,7 @@ import java.util.*;
 public class FilmDAO implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
-    private final String SELECT_FILM = "SELECT f.id, f.name, f.description, f.release_date, f.duration, r.ID AS rating_id, r.NAME AS rating_name ";
+    private final String selectFilm = "SELECT f.id, f.name, f.description, f.release_date, f.duration, r.ID AS rating_id, r.NAME AS rating_name ";
 
     @Autowired
     public FilmDAO(JdbcTemplate jdbcTemplate, DataSource dataSource) {
@@ -29,7 +29,7 @@ public class FilmDAO implements FilmStorage {
     @Override
     public List<Film> getAll() {
         return jdbcTemplate.query(
-                SELECT_FILM +
+                selectFilm +
                         "FROM \"film\" AS f " +
                         "LEFT JOIN \"rating\" r on f.RATING_ID = r.ID ", new FilmRowMapper(this));
     }
@@ -82,7 +82,7 @@ public class FilmDAO implements FilmStorage {
     @Override
     public Optional<Film> getFilmById(int id) {
         return jdbcTemplate.query(
-                SELECT_FILM +
+                selectFilm +
                         "FROM \"film\" AS f " +
                         "LEFT JOIN \"rating\" r on f.RATING_ID = r.ID " +
                         "WHERE f.ID = ?", new FilmRowMapper(this), id).stream().findAny();
@@ -106,7 +106,7 @@ public class FilmDAO implements FilmStorage {
     @Override
     public List<Film> getMostPopularFilms() {
         return jdbcTemplate.query(
-                SELECT_FILM +
+                selectFilm +
                         "FROM (" +
                         "SELECT DISTINCT f.ID, count(fl.USER_ID) " +
                         "FROM \"film\" AS f " +
@@ -123,7 +123,7 @@ public class FilmDAO implements FilmStorage {
     @Override
     public List<Film> getMostPopularFilms(int size) {
         return jdbcTemplate.query(
-                SELECT_FILM +
+                selectFilm +
                         "FROM (" +
                         "SELECT DISTINCT fl.FILM_ID, count(fl.USER_ID) " +
                         "FROM \"film_like\" AS fl " +
@@ -158,7 +158,7 @@ public class FilmDAO implements FilmStorage {
     @Override
     public List<Film> getCommonFilms(int userId, int friendId) {
         return jdbcTemplate.query(
-                SELECT_FILM +
+                selectFilm +
                         "FROM (" +
                         "SELECT DISTINCT f.FILM_ID, count(f.USER_ID) " +
                         "FROM \"film_like\" AS f " +
