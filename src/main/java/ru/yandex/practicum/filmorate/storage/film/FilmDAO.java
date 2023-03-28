@@ -154,4 +154,21 @@ public class FilmDAO implements FilmStorage {
                         "WHERE fg.FILM_ID = ?"
                 , new BeanPropertyRowMapper<>(Genre.class), filmId);
     }
+
+    @Override
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        return jdbcTemplate.query(
+                SELECT_FILM +
+                        "FROM (" +
+                        "SELECT DISTINCT f.FILM_ID, count(f.USER_ID) " +
+                        "FROM \"film_like\" AS f " +
+                        "LEFT JOIN \"film_like\" AS fl ON f.FILM_ID = fl.FILM_ID " +
+                        "WHERE f.USER_ID = ? and fl.USER_ID = ? " +
+                        "GROUP BY f.FILM_ID " +
+                        "ORDER BY count(f.USER_ID) DESC " +
+                        ") AS fl " +
+                        "LEFT JOIN \"film\" AS f ON fl.FILM_ID = f.ID " +
+                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID "
+                , new FilmRowMapper(this), userId, friendId);
+    }
 }
