@@ -15,7 +15,7 @@ import java.util.*;
 public class FilmDAO implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
-    private final static String SELECT_FILM = "SELECT f.id, f.name, f.description, f.release_date, f.duration, r.ID AS rating_id, r.NAME AS rating_name ";
+    private final String SELECT_FILM = "SELECT f.id, f.name, f.description, f.release_date, f.duration, r.ID AS rating_id, r.NAME AS rating_name ";
 
     @Autowired
     public FilmDAO(JdbcTemplate jdbcTemplate, DataSource dataSource) {
@@ -54,8 +54,8 @@ public class FilmDAO implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         jdbcTemplate.update(
-                "UPDATE \"film\" SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ? , RATING_ID = ? WHERE ID = ? "
-                , film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId()
+                "UPDATE \"film\" SET NAME = ?, DESCRIPTION = ?, RELEASE_DATE = ?, DURATION = ? , RATING_ID = ? WHERE ID = ? ",
+                film.getName(), film.getDescription(), film.getReleaseDate(), film.getDuration(), film.getMpa().getId(), film.getId()
         );
         List<Genre> genres = film.getGenres();
         if (genres != null) {
@@ -116,8 +116,8 @@ public class FilmDAO implements FilmStorage {
                         "LIMIT 10 " +
                         ") AS fl " +
                         "LEFT JOIN \"film\" AS f ON fl.ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID "
-                , new FilmRowMapper(this));
+                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID ",
+                new FilmRowMapper(this));
     }
 
     @Override
@@ -132,8 +132,8 @@ public class FilmDAO implements FilmStorage {
                         "LIMIT ? " +
                         ") AS fl " +
                         "LEFT JOIN \"film\" AS f ON fl.FILM_ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID "
-                , new FilmRowMapper(this), size);
+                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID ",
+                new FilmRowMapper(this), size);
     }
 
     private void insertFilmGenre(int filmId, int genreId) {
@@ -151,8 +151,8 @@ public class FilmDAO implements FilmStorage {
                 "SELECT g.ID, g.NAME" +
                         " FROM \"film_genre\" AS fg " +
                         "LEFT JOIN \"genre\" AS g on g.ID = fg.GENRE_ID " +
-                        "WHERE fg.FILM_ID = ?"
-                , new BeanPropertyRowMapper<>(Genre.class), filmId);
+                        "WHERE fg.FILM_ID = ?",
+                new BeanPropertyRowMapper<>(Genre.class), filmId);
     }
 
     @Override
@@ -168,7 +168,7 @@ public class FilmDAO implements FilmStorage {
                         "ORDER BY count(f.USER_ID) DESC " +
                         ") AS fl " +
                         "LEFT JOIN \"film\" AS f ON fl.FILM_ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID "
-                , new FilmRowMapper(this), userId, friendId);
+                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID ",
+                new FilmRowMapper(this), userId, friendId);
     }
 }
