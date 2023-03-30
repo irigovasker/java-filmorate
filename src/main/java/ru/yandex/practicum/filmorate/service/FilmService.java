@@ -6,6 +6,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.storage.DirectorDAO;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
@@ -16,11 +17,13 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final DirectorDAO directorDAO;
 
     @Autowired
-    public FilmService(@Qualifier("filmDAO") FilmStorage filmStorage, @Qualifier("userDAO") UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDAO") FilmStorage filmStorage, @Qualifier("userDAO") UserStorage userStorage, DirectorDAO directorDAO) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.directorDAO = directorDAO;
     }
 
     public List<Film> getAll() {
@@ -92,5 +95,23 @@ public class FilmService {
 
     public List<Film> getMostPopularFilms(int size) {
         return filmStorage.getMostPopularFilms(size);
+    }
+
+    public List<Film> getCommonFilms(int userId, int friendId) {
+        return filmStorage.getCommonFilms(userId, friendId);
+    }
+
+    public List<Film> getDirectorsFilmsSortByYear(int directorId) {
+        if (directorDAO.findOneById(directorId).isEmpty()) {
+            throw new ObjectNotFoundException("Несуществующий режиссер");
+        }
+        return filmStorage.getDirectorsFilmsSortByYear(directorId);
+    }
+
+    public List<Film> getDirectorsFilmsSortByLikes(int directorId) {
+        if (directorDAO.findOneById(directorId).isEmpty()) {
+            throw new ObjectNotFoundException("Несуществующий режиссер");
+        }
+        return filmStorage.getDirectorsFilmsSortByLikes(directorId);
     }
 }

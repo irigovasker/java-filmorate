@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.models.Film;
@@ -68,6 +67,23 @@ public class FilmController {
             return filmService.getMostPopularFilms(count.get());
         } else {
             return filmService.getMostPopularFilms();
+        }
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam(name = "userId") int userId,
+                                     @RequestParam(name = "friendId") int friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{id}")
+    public List<Film> getDirectorsFilms(@PathVariable int id, @RequestParam(name = "sortBy") String sortBy) {
+        if (sortBy.equals("year")) {
+            return filmService.getDirectorsFilmsSortByYear(id);
+        } else if (sortBy.equals("likes")) {
+            return filmService.getDirectorsFilmsSortByLikes(id);
+        } else {
+            throw new RuntimeException();
         }
     }
 
