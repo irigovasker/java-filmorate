@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.film;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jdbc.repository.query.Query;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -135,8 +134,8 @@ public class FilmDAO implements FilmStorage {
                         "LEFT JOIN \"film_like\" AS fl on f.ID = fl.FILM_ID " +
                         "WHERE f.name ILIKE ? " +
                         "GROUP BY f.ID " +
-                        "ORDER BY COUNT(fl.USER_ID) DESC"
-                , new FilmRowMapper(this), q);
+                        "ORDER BY COUNT(fl.USER_ID) DESC",
+                        new FilmRowMapper(this), q);
     }
 
     @Override
@@ -151,8 +150,8 @@ public class FilmDAO implements FilmStorage {
                         "LEFT JOIN \"film_like\" AS fl on f.ID = fl.FILM_ID " +
                         "WHERE d.name ILIKE ? " +
                         "GROUP BY f.ID " +
-                        "ORDER BY COUNT(fl.USER_ID) DESC"
-                , new FilmRowMapper(this), q);
+                        "ORDER BY COUNT(fl.USER_ID) DESC",
+                        new FilmRowMapper(this), q);
     }
 
     @Override
@@ -167,8 +166,8 @@ public class FilmDAO implements FilmStorage {
                         "LEFT JOIN \"film_like\" AS fl on f.ID = fl.FILM_ID " +
                         "WHERE f.name ILIKE ? OR d.name ILIKE ? " +
                         "GROUP BY f.ID " +
-                        "ORDER BY COUNT(fl.USER_ID) DESC"
-                , new FilmRowMapper(this), q, q);
+                        "ORDER BY COUNT(fl.USER_ID) DESC",
+                        new FilmRowMapper(this), q, q);
     }
 
     private void insertFilmGenre(int filmId, int genreId) {

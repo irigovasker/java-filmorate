@@ -45,7 +45,7 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
-    public List<Film> search (String query, String by) {
+    public List<Film> search(String query, String by) {
         switch (by) {
             case "title":
                 return filmStorage.searchByTitle(query);
@@ -57,7 +57,6 @@ public class FilmService {
             default:
                 throw new ObjectNotFoundException("Невалидный поиск");
         }
-
     }
 
     public void likeFilm(int filmId, int userId) {
