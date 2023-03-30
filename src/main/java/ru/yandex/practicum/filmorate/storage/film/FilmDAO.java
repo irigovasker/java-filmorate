@@ -125,15 +125,16 @@ public class FilmDAO implements FilmStorage {
         return jdbcTemplate.query(
                 selectFilm +
                         "FROM (" +
-                        "SELECT DISTINCT fl.FILM_ID, count(fl.USER_ID) " +
-                        "FROM \"film_like\" AS fl " +
-                        "GROUP BY fl.FILM_ID " +
+                        "SELECT DISTINCT f.ID, count(fl.USER_ID) " +
+                        "FROM \"film\" AS f " +
+                        "LEFT JOIN \"film_like\" AS fl ON f.ID = fl.FILM_ID " +
+                        "GROUP BY f.ID " +
                         "ORDER BY count(fl.USER_ID) DESC " +
                         "LIMIT ? " +
                         ") AS fl " +
-                        "LEFT JOIN \"film\" AS f ON fl.FILM_ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID ",
-                new FilmRowMapper(this), size);
+                        "LEFT JOIN \"film\" AS f ON fl.ID = f.ID " +
+                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID "
+                , new FilmRowMapper(this), size);
     }
 
     private void insertFilmGenre(int filmId, int genreId) {
@@ -170,5 +171,11 @@ public class FilmDAO implements FilmStorage {
                         "LEFT JOIN \"film\" AS f ON fl.FILM_ID = f.ID " +
                         "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID ",
                 new FilmRowMapper(this), userId, friendId);
+    }
+
+    @Override
+    public void deleteFilmById(int filmId){
+        jdbcTemplate.update(
+                "DELETE FROM \"film\" WHERE ID = ?", filmId);
     }
 }
