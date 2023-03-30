@@ -99,4 +99,28 @@ public class FilmService {
         }
         return filmStorage.getDirectorsFilmsSortByLikes(directorId);
     }
+
+    public List<Film> getMostPopularFilms(int genreId, int year) {
+        return filmStorage.getMostPopularFilms(genreId, year);
+    }
+
+    public List<Film> getMostPopularFilms(int size, int genreId, int year) {
+        return filmStorage.getMostPopularFilms(size, genreId, year);
+    }
+
+    public List<Film> getMostPopularFilmsByGenre(int genreId) {
+        return filmStorage.getMostPopularFilmsByGenre(genreId);
+    }
+
+    public List<Film> getMostPopularFilmsByGenre(int size, int genreId) {
+        return filmStorage.getMostPopularFilmsByGenre(size, genreId);
+    }
+
+    public List<Film> getMostPopularFilmsByYear(int year) {
+        return filmStorage.getMostPopularFilmsByYear(year);
+    }
+
+    public List<Film> getMostPopularFilmsByYear(int size, int year) {
+        return filmStorage.getMostPopularFilmsByYear(size, year);
+    }
 }

@@ -116,6 +116,33 @@ public class StoragesTests {
         List<Film> mostPopular = filmStorage.getMostPopularFilms();
         assertEquals(filmWithId2, mostPopular.get(0));
 
+        //getMostPopularFilms(1, 2022)
+        mostPopular = filmStorage.getMostPopularFilms(1, 2022);
+        assertEquals(filmWithId1, mostPopular.get(0));
+
+        //getMostPopularFilms(1, 1, 2022)
+        mostPopular = filmStorage.getMostPopularFilms(1, 2022);
+        assertEquals(filmWithId1, mostPopular.get(0));
+        assertEquals(1, mostPopular.size());
+
+        //getMostPopularFilmsByGenre(1)
+        mostPopular = filmStorage.getMostPopularFilmsByGenre(2);
+        assertEquals(filmWithId2, mostPopular.get(0));
+
+        //getMostPopularFilmsByGenre(1, 2)
+        mostPopular = filmStorage.getMostPopularFilmsByGenre(1, 2);
+        assertEquals(1, mostPopular.size());
+        assertEquals(filmWithId2, mostPopular.get(0));
+
+        //getMostPopularFilmsByYear(2022)
+        mostPopular = filmStorage.getMostPopularFilmsByYear(2022);
+        assertEquals(filmWithId1, mostPopular.get(0));
+
+        //getMostPopularFilmsByYear(1, 2021)
+        mostPopular = filmStorage.getMostPopularFilmsByYear(1, 2021);
+        assertEquals(1, mostPopular.size());
+        assertEquals(filmWithId2, mostPopular.get(0));
+
         //removeLike() and getMostPopularFilms(1)
         filmStorage.removeLike(1, 2);
         filmStorage.removeLike(2, 2);
