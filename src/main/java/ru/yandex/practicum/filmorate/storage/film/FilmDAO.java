@@ -129,21 +129,46 @@ public class FilmDAO implements FilmStorage {
     public List<Film> searchByTitle(String query) {
         String q = "%" + query + "%";
         return jdbcTemplate.query(
-                SELECT_FILM +
+                selectFilm +
                         "FROM \"film\" AS f " +
                         "LEFT JOIN \"rating\" r on f.RATING_ID = r.ID " +
-                        "WHERE f.name ILIKE ?"
+                        "LEFT JOIN \"film_like\" AS fl on f.ID = fl.FILM_ID " +
+                        "WHERE f.name ILIKE ? " +
+                        "GROUP BY f.ID " +
+                        "ORDER BY COUNT(fl.USER_ID) DESC"
                 , new FilmRowMapper(this), q);
     }
 
     @Override
     public List<Film> searchByDirector(String query) {
-        return null;
+        String q = "%" + query + "%";
+        return jdbcTemplate.query(
+                selectFilm +
+                        "FROM \"film\" AS f " +
+                        "LEFT JOIN \"rating\" r on f.RATING_ID = r.ID " +
+                        "LEFT JOIN \"film_director\" AS fd on f.ID = fd.FILM_ID " +
+                        "LEFT JOIN \"director\" AS d on fd.DIRECTOR_ID = d.ID " +
+                        "LEFT JOIN \"film_like\" AS fl on f.ID = fl.FILM_ID " +
+                        "WHERE d.name ILIKE ? " +
+                        "GROUP BY f.ID " +
+                        "ORDER BY COUNT(fl.USER_ID) DESC"
+                , new FilmRowMapper(this), q);
     }
 
     @Override
     public List<Film> searchByTitleDirector(String query) {
-        return null;
+        String q = "%" + query + "%";
+        return jdbcTemplate.query(
+                selectFilm +
+                        "FROM \"film\" AS f " +
+                        "LEFT JOIN \"rating\" r on f.RATING_ID = r.ID " +
+                        "LEFT JOIN \"film_director\" AS fd on f.ID = fd.FILM_ID " +
+                        "LEFT JOIN \"director\" AS d on fd.DIRECTOR_ID = d.ID " +
+                        "LEFT JOIN \"film_like\" AS fl on f.ID = fl.FILM_ID " +
+                        "WHERE f.name ILIKE ? OR d.name ILIKE ? " +
+                        "GROUP BY f.ID " +
+                        "ORDER BY COUNT(fl.USER_ID) DESC"
+                , new FilmRowMapper(this), q, q);
     }
 
     private void insertFilmGenre(int filmId, int genreId) {
