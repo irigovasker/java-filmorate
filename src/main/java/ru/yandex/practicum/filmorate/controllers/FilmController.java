@@ -75,4 +75,15 @@ public class FilmController {
                                      @RequestParam(name = "friendId") int friendId) {
         return filmService.getCommonFilms(userId, friendId);
     }
+
+    @GetMapping("/director/{id}")
+    public List<Film> getDirectorsFilms(@PathVariable int id, @RequestParam(name = "sortBy") String sortBy) {
+        if (sortBy.equals("year")) {
+            return filmService.getDirectorsFilmsSortByYear(id);
+        } else if (sortBy.equals("likes")) {
+            return filmService.getDirectorsFilmsSortByLikes(id);
+        } else {
+            throw new RuntimeException();
+        }
+    }
 }
