@@ -23,8 +23,8 @@ public class GenreDAO {
     }
 
     public Genre getGenreById(int id) {
-        return jdbcTemplate.query("SELECT * FROM \"genre\" WHERE id =?"
-                        , new BeanPropertyRowMapper<>(Genre.class), id)
+        return jdbcTemplate.query("SELECT * FROM \"genre\" WHERE id =?",
+                        new BeanPropertyRowMapper<>(Genre.class), id)
                 .stream().findAny().orElseThrow(() -> new ObjectNotFoundException("Несуществующий жанр"));
     }
 }

@@ -86,4 +86,10 @@ public class FilmController {
             throw new RuntimeException();
         }
     }
+
+    @GetMapping("/search")
+    public List<Film> search(@RequestParam(name = "query") String query,
+                            @RequestParam(name = "by") String by) {
+        return filmService.search(query, by);
+    }
 }

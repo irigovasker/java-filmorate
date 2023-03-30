@@ -45,6 +45,20 @@ public class FilmService {
         return filmStorage.updateFilm(film);
     }
 
+    public List<Film> search(String query, String by) {
+        switch (by) {
+            case "title":
+                return filmStorage.searchByTitle(query);
+            case "director":
+                return filmStorage.searchByDirector(query);
+            case "title,director":
+            case "director,title":
+                return filmStorage.searchByTitleDirector(query);
+            default:
+                throw new ObjectNotFoundException("Невалидный поиск");
+        }
+    }
+
     public void likeFilm(int filmId, int userId) {
         Film film = getFilmById(filmId);
         User user = userStorage.getUserById(userId).orElseThrow(() -> new ObjectNotFoundException("Несуществующий пользователь"));
