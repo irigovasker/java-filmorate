@@ -430,7 +430,7 @@ public class FilmDAO implements FilmStorage {
                         "WHERE f.RELEASE_DATE LIKE ?",
                 new FilmRowMapper(this), size, year + "%");
     }
-    
+
     public void deleteFilmById(int filmId) {
         jdbcTemplate.update(
                 "DELETE FROM \"film\" WHERE ID = ?", filmId);
