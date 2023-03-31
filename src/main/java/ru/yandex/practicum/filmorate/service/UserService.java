@@ -128,6 +128,12 @@ public class UserService {
     }
 
     public List<User> getUserFriends(int id) {
+        getUserById(id);
         return userStorage.getUserFriends(id);
+    }
+
+    public void deleteUserById(int id) {
+        getUserById(id);
+        userStorage.removeUser(id);
     }
 }

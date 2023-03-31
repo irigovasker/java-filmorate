@@ -20,7 +20,6 @@ import java.util.Optional;
 public class FilmController {
     private final FilmService filmService;
 
-
     @GetMapping
     public List<Film> getFilms() {
         return filmService.getAll();
@@ -102,5 +101,17 @@ public class FilmController {
         } else {
             throw new RuntimeException();
         }
+    }
+
+    @GetMapping("/search")
+    public List<Film> search(@RequestParam(name = "query") String query,
+                             @RequestParam(name = "by") String by) {
+        return filmService.search(query, by);
+    }
+
+    @DeleteMapping("/{filmId}")
+    public void deleteFilmById(@PathVariable int filmId) {
+        getFilmById(filmId);
+        filmService.deleteFilmById(filmId);
     }
 }
