@@ -88,12 +88,12 @@ public class FilmController {
 
     @GetMapping("/search")
     public List<Film> search(@RequestParam(name = "query") String query,
-                            @RequestParam(name = "by") String by) {
+                             @RequestParam(name = "by") String by) {
         return filmService.search(query, by);
     }
 
     @DeleteMapping("/{filmId}")
-    public void deleteFilmById(@PathVariable int filmId){
+    public void deleteFilmById(@PathVariable int filmId) {
         getFilmById(filmId);
         filmService.deleteFilmById(filmId);
     }
