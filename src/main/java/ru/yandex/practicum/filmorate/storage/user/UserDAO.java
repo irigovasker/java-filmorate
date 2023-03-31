@@ -1,27 +1,31 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.storage.film.FilmDAO;
 
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
+@Slf4j
 public class UserDAO implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
+    private final FilmDAO filmDAO;
     private static final String SELECT_USER = "SELECT u.id, u.email, u.login, u.name, u.birthday ";
 
     @Autowired
-    public UserDAO(JdbcTemplate jdbcTemplate, DataSource dataSource) {
+    public UserDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FilmDAO filmDAO) {
         this.jdbcTemplate = jdbcTemplate;
+        this.filmDAO = filmDAO;
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"user\"")
                 .usingGeneratedKeyColumns("id")
@@ -121,5 +125,56 @@ public class UserDAO implements UserStorage {
     @Override
     public void removeUser(int id) {
         jdbcTemplate.update("DELETE FROM \"user\" WHERE ID = ?", id);
+    }
+
+    @Override
+    public List<Film> getSimilarUsers(int userId) {
+
+        log.info("Method: getSimilarUsers; User ID: {}", userId);
+
+        String createTableQuery = "CREATE TEMPORARY TABLE common_movies AS (\n" +
+                "    SELECT u1.id AS id1, u2.id AS id2, COUNT(DISTINCT l1.film_id) AS common_movies\n" +
+                "    FROM \"film_like\" l1\n" +
+                "    JOIN \"film_like\" l2 ON l1.film_id = l2.film_id AND l1.user_id <> l2.user_id\n" +
+                "    JOIN \"user\" u1 ON l1.user_id = u1.id\n" +
+                "    JOIN \"user\" u2 ON l2.user_id = u2.id\n" +
+                "    WHERE u1.id = ?\n" +
+                "    GROUP BY u1.id, u2.id\n" +
+                ")";
+
+        String selectQuery = "SELECT u.ID " +
+                "FROM common_movies \n" +
+                "INNER JOIN \"user\" u ON common_movies.id2 = u.ID\n" +
+                "WHERE common_movies.common_movies = (\n" +
+                "    SELECT MAX(t2.common_movies)\n" +
+                "    FROM common_movies t2\n" +
+                ")";
+
+        String dropTableQuery = "DROP TABLE IF EXISTS common_movies";
+
+        jdbcTemplate.execute(dropTableQuery);
+        jdbcTemplate.update(createTableQuery, userId);
+        List<Integer> similarUsers = jdbcTemplate.queryForList(selectQuery, Integer.class);
+        jdbcTemplate.execute(dropTableQuery);
+
+        log.info("Method: getSimilarUsers; List of users: {}", similarUsers);
+
+        List<Film> likedMovies = filmDAO.getLikedFilms(userId);
+
+        Map<Film, Integer> recommendations = new HashMap<>();
+        for (Integer similarUser : similarUsers) {
+            List<Film> similarUserLikedMovies = filmDAO.getLikedFilms(similarUser);
+            for (Film movie : similarUserLikedMovies) {
+                if (!likedMovies.contains(movie)) {
+                    int count = recommendations.getOrDefault(movie, 0);
+                    recommendations.put(movie, count + 1);
+                }
+            }
+        }
+
+        return recommendations.entrySet().stream()
+                .sorted(Collections.reverseOrder(Map.Entry.comparingByValue()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 }

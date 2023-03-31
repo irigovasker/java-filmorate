@@ -431,6 +431,18 @@ public class FilmDAO implements FilmStorage {
                 new FilmRowMapper(this), size, year + "%");
     }
 
+    @Override
+    public List<Film> getLikedFilms(int userId){
+        return jdbcTemplate.query(
+                selectFilm +
+                        "FROM \"film_like\" AS fl\n" +
+                        "INNER JOIN \"film\" AS f ON fl.FILM_ID  = f.ID \n" +
+                        "LEFT JOIN \"rating\" AS r on f.RATING_ID = r.ID " +
+                        "WHERE USER_ID = ?",
+                new FilmRowMapper(this),
+                userId);
+    }
+
     public void deleteFilmById(int filmId) {
         jdbcTemplate.update(
                 "DELETE FROM \"film\" WHERE ID = ?", filmId);

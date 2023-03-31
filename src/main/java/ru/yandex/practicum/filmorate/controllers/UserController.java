@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.util.ErrorsUtil;
@@ -75,5 +76,10 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public void deleteUserById(@PathVariable int userId) {
         userService.deleteUserById(userId);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public ResponseEntity<List<Film>> showRecommendedFilms(@PathVariable int userId) {
+        return new ResponseEntity<>(userService.getSimilarUsers(userId), HttpStatus.OK);
     }
 }
