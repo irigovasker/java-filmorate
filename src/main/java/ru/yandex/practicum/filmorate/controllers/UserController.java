@@ -21,8 +21,6 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-
-
     @GetMapping
     public List<User> getUsers() {
         return userService.getAll();
@@ -75,7 +73,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUserById(@PathVariable int userId){
+    public void deleteUserById(@PathVariable int userId) {
         userService.deleteUserById(userId);
     }
 }
