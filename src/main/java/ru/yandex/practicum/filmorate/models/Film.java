@@ -27,6 +27,7 @@ public class Film {
     private Set<Integer> likedUsers;
     private List<Genre> genres;
     private Rating mpa;
+    private List<Director> directors;
 
     @Override
     public boolean equals(Object o) {

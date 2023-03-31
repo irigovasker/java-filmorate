@@ -132,6 +132,7 @@ public class UserService {
     }
 
     public List<User> getUserFriends(int id) {
+        getUserById(id);
         return userStorage.getUserFriends(id);
     }
 
@@ -140,5 +141,10 @@ public class UserService {
         log.info("Method: getSimilarUsers; User ID: {}", id);
 
         return userStorage.getSimilarUsers(id);
+    }
+
+    public void deleteUserById(int id) {
+        getUserById(id);
+        userStorage.removeUser(id);
     }
 }

@@ -23,8 +23,6 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-
-
     @GetMapping
     public List<User> getUsers() {
         return userService.getAll();
@@ -79,5 +77,10 @@ public class UserController {
     @GetMapping("/{userId}/recommendations")
     public ResponseEntity<List<Film>> showRecommendedFilms(@PathVariable int userId) {
         return new ResponseEntity<>(userService.getSimilarUsers(userId), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUserById(@PathVariable int userId) {
+        userService.deleteUserById(userId);
     }
 }
