@@ -113,4 +113,8 @@ public class FilmService {
         }
         return filmStorage.getDirectorsFilmsSortByLikes(directorId);
     }
+
+    public void deleteFilmById(int filmId) {
+        filmStorage.deleteFilmById(filmId);
+    }
 }

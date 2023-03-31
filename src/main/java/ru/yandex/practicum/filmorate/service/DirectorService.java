@@ -12,7 +12,6 @@ import java.util.List;
 public class DirectorService {
     private final DirectorDAO directorDAO;
 
-
     @Autowired
     public DirectorService(DirectorDAO directorDAO) {
         this.directorDAO = directorDAO;

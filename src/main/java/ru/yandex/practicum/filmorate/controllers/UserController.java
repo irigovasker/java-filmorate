@@ -21,8 +21,6 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-
-
     @GetMapping
     public List<User> getUsers() {
         return userService.getAll();
@@ -72,5 +70,10 @@ public class UserController {
     @GetMapping("/{id}/friends/common/{otherId}")
     public ResponseEntity<List<User>> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         return new ResponseEntity<>(userService.getCommonFriend(id, otherId), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUserById(@PathVariable int userId) {
+        userService.deleteUserById(userId);
     }
 }

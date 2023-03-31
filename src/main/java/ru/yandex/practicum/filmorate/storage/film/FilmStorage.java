@@ -35,4 +35,6 @@ public interface FilmStorage {
     List<Film> getDirectorsFilmsSortByYear(int directorId);
 
     List<Film> getDirectorsFilmsSortByLikes(int directorId);
+
+    void deleteFilmById(int id);
 }
