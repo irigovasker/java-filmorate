@@ -36,5 +36,17 @@ public interface FilmStorage {
 
     List<Film> getDirectorsFilmsSortByLikes(int directorId);
 
+    List<Film> getMostPopularFilms(int genreId, int year);
+
+    List<Film> getMostPopularFilms(int size, int genreId, int year);
+
+    List<Film> getMostPopularFilmsByGenre(int genreId);
+
+    List<Film> getMostPopularFilmsByGenre(int size, int genreId);
+
+    List<Film> getMostPopularFilmsByYear(int year);
+
+    List<Film> getMostPopularFilmsByYear(int size, int year);
+
     void deleteFilmById(int id);
 }
