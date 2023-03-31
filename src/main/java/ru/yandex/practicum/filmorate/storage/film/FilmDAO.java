@@ -171,4 +171,18 @@ public class FilmDAO implements FilmStorage {
                         "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID ",
                 new FilmRowMapper(this), userId, friendId);
     }
+
+    @Override
+    public List<Film> getLikedFilms(int userId){
+        return jdbcTemplate.query(
+                selectFilm +
+                        "FROM \"film_like\" AS fl\n" +
+                        "INNER JOIN \"film\" AS f ON fl.FILM_ID  = f.ID \n" +
+                        "LEFT JOIN \"rating\" AS r on f.RATING_ID = r.ID " +
+                        "WHERE USER_ID = ?",
+                new FilmRowMapper(this),
+                userId);
+    }
+
+
 }

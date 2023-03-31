@@ -1,8 +1,11 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.user.Relation;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
@@ -14,6 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class UserService {
     private final UserStorage userStorage;
 
@@ -129,5 +133,12 @@ public class UserService {
 
     public List<User> getUserFriends(int id) {
         return userStorage.getUserFriends(id);
+    }
+
+    public List<Film> getSimilarUsers(int id) {
+
+        log.info("Method: getSimilarUsers; User ID: {}", id);
+
+        return userStorage.getSimilarUsers(id);
     }
 }

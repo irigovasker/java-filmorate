@@ -1,3 +1,6 @@
+
+
+
 MERGE INTO "genre" values ( 1, 'Комедия' );
 MERGE INTO "genre" values ( 2, 'Драма' );
 MERGE INTO "genre" values ( 3, 'Мультфильм' );
