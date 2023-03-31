@@ -20,7 +20,6 @@ import java.util.Optional;
 public class FilmController {
     private final FilmService filmService;
 
-
     @GetMapping
     public List<Film> getFilms() {
         return filmService.getAll();
@@ -62,12 +61,29 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilm(@RequestParam(name = "count") Optional<Integer> count) {
+    public List<Film> getPopularFilm(@RequestParam(name = "count") Optional<Integer> count,
+                                     @RequestParam(name = "genreId") Optional<Integer> genreId,
+                                     @RequestParam(name = "year") Optional<Integer> year) {
         if (count.isPresent()) {
-            return filmService.getMostPopularFilms(count.get());
+            if (genreId.isPresent() && year.isPresent()) {
+                return filmService.getMostPopularFilms(count.get(), genreId.get(), year.get());
+            } else if (genreId.isPresent()) {
+                return filmService.getMostPopularFilmsByGenre(count.get(), genreId.get());
+            } else if (year.isPresent()) {
+                return filmService.getMostPopularFilmsByYear(count.get(), year.get());
+            } else {
+                return filmService.getMostPopularFilms(count.get());
+            }
         } else {
-            return filmService.getMostPopularFilms();
+            if (genreId.isPresent() && year.isPresent()) {
+                return filmService.getMostPopularFilms(genreId.get(), year.get());
+            } else if (genreId.isPresent()) {
+                return filmService.getMostPopularFilmsByGenre(genreId.get());
+            } else if (year.isPresent()) {
+                return filmService.getMostPopularFilmsByYear(year.get());
+            }
         }
+        return filmService.getMostPopularFilms();
     }
 
     @GetMapping("/common")
@@ -89,7 +105,13 @@ public class FilmController {
 
     @GetMapping("/search")
     public List<Film> search(@RequestParam(name = "query") String query,
-                            @RequestParam(name = "by") String by) {
+                             @RequestParam(name = "by") String by) {
         return filmService.search(query, by);
+    }
+
+    @DeleteMapping("/{filmId}")
+    public void deleteFilmById(@PathVariable int filmId) {
+        getFilmById(filmId);
+        filmService.deleteFilmById(filmId);
     }
 }
