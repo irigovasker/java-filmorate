@@ -20,7 +20,6 @@ import java.util.Optional;
 public class FilmController {
     private final FilmService filmService;
 
-
     @GetMapping
     public List<Film> getFilms() {
         return filmService.getAll();
