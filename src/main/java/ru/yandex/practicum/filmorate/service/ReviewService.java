@@ -40,4 +40,17 @@ public class ReviewService {
         reviewStorage.delete(id);
     }
 
+    public void addLike(int reviewId, int userId) {
+        reviewStorage.addReaction(reviewId, userId, true);
+    }
+
+    public void addDislike(int reviewId, int userId) {
+        reviewStorage.addReaction(reviewId, userId, false);
+    }
+
+    public void removeReaction(int reviewId, int userId) {
+        reviewStorage.deleteReaction(reviewId, userId);
+    }
+
+
 }

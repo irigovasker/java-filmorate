@@ -7,16 +7,12 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.server.ResponseStatusException;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Review;
 import ru.yandex.practicum.filmorate.models.User;
-import ru.yandex.practicum.filmorate.storage.film.FilmRowMapper;
-import ru.yandex.practicum.filmorate.util.CustomValidateException;
 import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
 
 import javax.sql.DataSource;
-import java.net.http.HttpTimeoutException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +20,6 @@ import java.util.Optional;
 
 @Component
 public class ReviewDAO {
-
-
-    /*
-
-     апдейт ревью, не должен меняться юзер/фильм айди
-     ревью для фильма по айди не ищутся
-
-
-
-     */
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
@@ -47,7 +33,7 @@ public class ReviewDAO {
     }
 
     public Review create(Review review) {
-        if (!isUser(review.getUserId()) || !isFilm(review.getFilmId()) ) {
+        if (!isUser(review.getUserId()) || !isFilm(review.getFilmId())) {
             throw new ObjectNotFoundException("Невозможно создать отзыв");
         } else if (review.getIsPositive() == null || review.getUserId() == null || review.getFilmId() == null) {
             throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
@@ -60,15 +46,18 @@ public class ReviewDAO {
             parameters.put("useful", review.getUseful());
 
             review.setId(simpleJdbcInsert.executeAndReturnKey(parameters).intValue());
+            Integer useful = getReactions(review.getId());
+            if (useful == null) {
+                useful = 0;
+            }
+            setUseful(useful, review.getId());
             return review;
-
         }
-
     }
 
     public Review update(Review review) {
-        jdbcTemplate.update("UPDATE \"review\" SET CONTENT = ?, IS_POSITIVE = ?, USEFUL = ? WHERE ID = ?",
-                review.getContent(), review.getIsPositive(), review.getUseful(), review.getId()
+        jdbcTemplate.update("UPDATE \"review\" SET CONTENT = ?, IS_POSITIVE = ? WHERE ID = ?",
+                review.getContent(), review.getIsPositive(), review.getId()
         );
         return getById(review.getId());
     }
@@ -84,19 +73,45 @@ public class ReviewDAO {
     }
 
     public List<Review> getByFilmId(int filmId, int count) {
-        return jdbcTemplate.query("SELECT * FROM \"review\" WHERE FILM_ID = ? LIMIT ?",
+        return jdbcTemplate.query("SELECT * FROM \"review\" WHERE FILM_ID = ? ORDER BY USEFUL DESC LIMIT ?",
                 new BeanPropertyRowMapper<>(Review.class), filmId, count);
     }
 
     public List<Review> getReviews(int count) {
-        return jdbcTemplate.query("SELECT * FROM \"review\" LIMIT ?",
+        return jdbcTemplate.query("SELECT * FROM \"review\" ORDER BY USEFUL DESC LIMIT ?",
                 new BeanPropertyRowMapper<>(Review.class), count);
+    }
+
+    public void addReaction(int reviewId, int userId, boolean isLike) {
+        String sql = "INSERT INTO \"review_like\" (REVIEW_ID, USER_ID, USEFUL) VALUES (?, ?, ?)";
+        int useful = 0;
+        if (isLike) {
+            useful += 1;
+        } else {
+            useful -= 1;
+        }
+        jdbcTemplate.update(sql, reviewId, userId, useful);
+        setUseful(getReactions(reviewId), reviewId);
+    }
+
+    public void deleteReaction(int reviewId, int userId) {
+        jdbcTemplate.update("DELETE FROM \"review_like\" WHERE REVIEW_ID = ? AND USER_ID = ?", reviewId, userId);
+        setUseful(getReactions(reviewId), reviewId);
+    }
+
+    public Integer getReactions(int reviewId) {
+        return jdbcTemplate.queryForObject("SELECT SUM(useful) FROM \"review_like\" WHERE REVIEW_ID = ?",
+                Integer.class, reviewId);
+    }
+
+    public void setUseful(Integer useful, int reviewId) {
+        jdbcTemplate.update("UPDATE \"review\" SET USEFUL = ? WHERE ID = ?", useful, reviewId);
     }
 
     public boolean isUser(int userId) {
            Optional<User> user = jdbcTemplate.query(
-                    "SELECT * FROM \"user\" WHERE id = ?"
-                    , new BeanPropertyRowMapper<>(User.class), userId)
+                    "SELECT * FROM \"user\" WHERE ID = ?",
+                           new BeanPropertyRowMapper<>(User.class), userId)
                     .stream().findAny();
         return user.isPresent();
     }

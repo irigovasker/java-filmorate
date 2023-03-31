@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.RequiredArgsConstructor;
-import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.models.Review;
@@ -42,7 +41,8 @@ public class ReviewController {
 
         if (count.isPresent()) {
             c = count.get();
-        } if (filmId.isPresent()) {
+        }
+        if (filmId.isPresent()) {
             id = filmId.get();
         }
         return reviewService.getByFilmId(id, c);
@@ -51,6 +51,26 @@ public class ReviewController {
     @DeleteMapping("/{id}")
     public void deleteReview(@PathVariable int id) {
         reviewService.delete(id);
+    }
+
+    @PutMapping("{id}/like/{userId}")
+    public void addLike(@PathVariable int id, @PathVariable int userId) {
+        reviewService.addLike(id, userId);
+    }
+
+    @PutMapping("{id}/dislike/{userId}")
+    public void addDislike(@PathVariable int id, @PathVariable int userId) {
+        reviewService.addDislike(id, userId);
+    }
+
+    @DeleteMapping("{id}/like/{userId}")
+    public void removeLike(@PathVariable int id, @PathVariable int userId) {
+        reviewService.removeReaction(id, userId);
+    }
+
+    @DeleteMapping("{id}/dislike/{userId}")
+    public void removeDislike(@PathVariable int id, @PathVariable int userId) {
+        reviewService.removeReaction(id, userId);
     }
 
 }
