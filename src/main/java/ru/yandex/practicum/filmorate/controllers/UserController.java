@@ -73,4 +73,9 @@ public class UserController {
     public ResponseEntity<List<User>> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         return new ResponseEntity<>(userService.getCommonFriend(id, otherId), HttpStatus.OK);
     }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUserById(@PathVariable int userId){
+        userService.deleteUserById(userId);
+    }
 }
