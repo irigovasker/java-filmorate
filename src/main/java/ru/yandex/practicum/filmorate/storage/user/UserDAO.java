@@ -2,7 +2,6 @@ package ru.yandex.practicum.filmorate.storage.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.relational.core.sql.In;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -10,7 +9,6 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmDAO;
-import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import javax.sql.DataSource;
 import java.util.*;
@@ -135,22 +133,22 @@ public class UserDAO implements UserStorage {
         log.info("Method: getSimilarUsers; User ID: {}", userId);
 
         String createTableQuery = "CREATE TEMPORARY TABLE common_movies AS (\n" +
-        "    SELECT u1.id AS id1, u2.id AS id2, COUNT(DISTINCT l1.film_id) AS common_movies\n" +
-        "    FROM \"film_like\" l1\n" +
-        "    JOIN \"film_like\" l2 ON l1.film_id = l2.film_id AND l1.user_id <> l2.user_id\n" +
-        "    JOIN \"user\" u1 ON l1.user_id = u1.id\n" +
-        "    JOIN \"user\" u2 ON l2.user_id = u2.id\n" +
-        "    WHERE u1.id = ?\n" +
-        "    GROUP BY u1.id, u2.id\n" +
-        ")";
+                "    SELECT u1.id AS id1, u2.id AS id2, COUNT(DISTINCT l1.film_id) AS common_movies\n" +
+                "    FROM \"film_like\" l1\n" +
+                "    JOIN \"film_like\" l2 ON l1.film_id = l2.film_id AND l1.user_id <> l2.user_id\n" +
+                "    JOIN \"user\" u1 ON l1.user_id = u1.id\n" +
+                "    JOIN \"user\" u2 ON l2.user_id = u2.id\n" +
+                "    WHERE u1.id = ?\n" +
+                "    GROUP BY u1.id, u2.id\n" +
+                ")";
 
         String selectQuery = "SELECT u.ID " +
-        "FROM common_movies \n" +
-        "INNER JOIN \"user\" u ON common_movies.id2 = u.ID\n" +
-        "WHERE common_movies.common_movies = (\n" +
-        "    SELECT MAX(t2.common_movies)\n" +
-        "    FROM common_movies t2\n" +
-        ")";
+                "FROM common_movies \n" +
+                "INNER JOIN \"user\" u ON common_movies.id2 = u.ID\n" +
+                "WHERE common_movies.common_movies = (\n" +
+                "    SELECT MAX(t2.common_movies)\n" +
+                "    FROM common_movies t2\n" +
+                ")";
 
         String dropTableQuery = "DROP TABLE IF EXISTS common_movies";
 

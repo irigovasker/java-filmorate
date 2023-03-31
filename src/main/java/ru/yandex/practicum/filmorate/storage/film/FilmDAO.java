@@ -437,7 +437,7 @@ public class FilmDAO implements FilmStorage {
     }
 
     @Override
-    public List<Film> getLikedFilms(int userId){
+    public List<Film> getLikedFilms(int userId) {
         return jdbcTemplate.query(
                 selectFilm +
                         "FROM \"film_like\" AS fl\n" +

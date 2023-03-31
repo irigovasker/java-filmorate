@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
-import org.springframework.data.relational.core.sql.In;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 
@@ -29,5 +28,6 @@ public interface UserStorage {
     void removeRelation(Relation relation);
 
     void removeUser(int id);
+
     List<Film> getSimilarUsers(int userId);
 }
