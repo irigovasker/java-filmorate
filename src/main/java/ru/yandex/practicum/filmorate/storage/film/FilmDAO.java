@@ -136,7 +136,7 @@ public class FilmDAO implements FilmStorage {
                         "WHERE f.name ILIKE ? " +
                         "GROUP BY f.ID " +
                         "ORDER BY COUNT(fl.USER_ID) DESC",
-                        new FilmRowMapper(this), q);
+                new FilmRowMapper(this), q);
     }
 
     @Override
@@ -152,7 +152,7 @@ public class FilmDAO implements FilmStorage {
                         "WHERE d.name ILIKE ? " +
                         "GROUP BY f.ID " +
                         "ORDER BY COUNT(fl.USER_ID) DESC",
-                        new FilmRowMapper(this), q);
+                new FilmRowMapper(this), q);
     }
 
     @Override
@@ -168,7 +168,7 @@ public class FilmDAO implements FilmStorage {
                         "WHERE f.name ILIKE ? OR d.name ILIKE ? " +
                         "GROUP BY f.ID " +
                         "ORDER BY COUNT(fl.USER_ID) DESC",
-                        new FilmRowMapper(this), q, q);
+                new FilmRowMapper(this), q, q);
     }
 
     private void insertFilmGenre(int filmId, int genreId) {
@@ -310,7 +310,7 @@ public class FilmDAO implements FilmStorage {
     }
 
     @Override
-    public void deleteFilmById(int filmId){
+    public void deleteFilmById(int filmId) {
         jdbcTemplate.update(
                 "DELETE FROM \"film\" WHERE ID = ?", filmId);
     }

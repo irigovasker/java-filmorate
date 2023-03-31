@@ -132,7 +132,7 @@ public class UserService {
         return userStorage.getUserFriends(id);
     }
 
-    public void deleteUserById(int id){
+    public void deleteUserById(int id) {
         getUserById(id);
         userStorage.removeUser(id);
     }
