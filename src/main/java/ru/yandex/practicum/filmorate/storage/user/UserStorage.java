@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 
 import java.util.List;
@@ -27,4 +28,6 @@ public interface UserStorage {
     void removeRelation(Relation relation);
 
     void removeUser(int id);
+
+    List<Film> getSimilarUsers(int userId);
 }
