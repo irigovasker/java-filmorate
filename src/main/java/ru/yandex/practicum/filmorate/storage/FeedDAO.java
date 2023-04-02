@@ -23,7 +23,7 @@ public class FeedDAO {
                 .usingColumns("timestamp", "user_id", "event_type", "operation", "entity_id");
     }
 
-    public void writeFeed (int userId, String eventType, String operation, Integer entityId) {
+    public void writeFeed(int userId, String eventType, String operation, Integer entityId) {
         jdbcTemplate.update("INSERT INTO \"feed\" (timestamp, user_id, event_type, operation, entity_id) VALUES ( ?, ?, ?, ?, ? )",
                 System.currentTimeMillis(), userId, eventType, operation, entityId);
     }
