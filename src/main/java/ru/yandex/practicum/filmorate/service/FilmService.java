@@ -49,8 +49,7 @@ public class FilmService {
         if (film != null && user != null) {
             try {
                 filmStorage.likeFilm(userId, filmId);
-            } catch (DataAccessException e) {
-                throw new ObjectNotFoundException("Лайк уже существует");
+            } catch (DataAccessException ignored) {
             }
         } else {
             throw new ObjectNotFoundException("Несуществующий фильм");
