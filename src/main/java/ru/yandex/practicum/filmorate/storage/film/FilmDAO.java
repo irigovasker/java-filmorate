@@ -86,7 +86,6 @@ public class FilmDAO implements FilmStorage {
     @Override
     public void likeFilm(int userId, int filmId) {
         jdbcTemplate.update("INSERT INTO \"film_like\"(user_id, film_id) VALUES ( ?, ? ) ", userId, filmId);
-        feedDAO.writeFeed(userId, "LIKE", "ADD", filmId);
     }
 
     @Override

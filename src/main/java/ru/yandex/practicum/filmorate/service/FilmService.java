@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.DirectorDAO;
+import ru.yandex.practicum.filmorate.storage.FeedDAO;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
@@ -18,12 +19,14 @@ public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
     private final DirectorDAO directorDAO;
+    private final FeedDAO feedDAO;
 
     @Autowired
-    public FilmService(@Qualifier("filmDAO") FilmStorage filmStorage, @Qualifier("userDAO") UserStorage userStorage, DirectorDAO directorDAO) {
+    public FilmService(@Qualifier("filmDAO") FilmStorage filmStorage, @Qualifier("userDAO") UserStorage userStorage, DirectorDAO directorDAO, FeedDAO feedDAO) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
         this.directorDAO = directorDAO;
+        this.feedDAO = feedDAO;
     }
 
     public List<Film> getAll() {
@@ -62,12 +65,11 @@ public class FilmService {
     public void likeFilm(int filmId, int userId) {
         Film film = getFilmById(filmId);
         User user = userStorage.getUserById(userId).orElseThrow(() -> new ObjectNotFoundException("Несуществующий пользователь"));
-
+        feedDAO.writeFeed(userId, "LIKE", "ADD", filmId);
         if (film != null && user != null) {
             try {
                 filmStorage.likeFilm(userId, filmId);
-            } catch (DataAccessException e) {
-                throw new ObjectNotFoundException("Лайк уже существует");
+            } catch (DataAccessException ignored) {
             }
         } else {
             throw new ObjectNotFoundException("Несуществующий фильм");
