@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.models.Feed;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.service.UserService;
@@ -82,5 +83,10 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public void deleteUserById(@PathVariable int userId) {
         userService.deleteUserById(userId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public ResponseEntity<List<Feed>> getUserFeed(@PathVariable int id) {
+        return new ResponseEntity<>(userService.getUserFeed(id), HttpStatus.OK);
     }
 }

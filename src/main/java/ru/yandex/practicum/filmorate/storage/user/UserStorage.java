@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
+import ru.yandex.practicum.filmorate.models.Feed;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 
@@ -30,4 +31,6 @@ public interface UserStorage {
     void removeUser(int id);
 
     List<Film> getSimilarUsers(int userId);
+
+    List<Feed> getUserFeed(int userId);
 }

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Director;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
-
+import ru.yandex.practicum.filmorate.storage.FeedDAO;
 import javax.sql.DataSource;
 import java.util.*;
 
@@ -16,11 +16,13 @@ import java.util.*;
 public class FilmDAO implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
+    private final FeedDAO feedDAO;
     private final String selectFilm = "SELECT f.id, f.name, f.description, f.release_date, f.duration, r.ID AS rating_id, r.NAME AS rating_name ";
 
     @Autowired
-    public FilmDAO(JdbcTemplate jdbcTemplate, DataSource dataSource) {
+    public FilmDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedDAO feedDAO) {
         this.jdbcTemplate = jdbcTemplate;
+        this.feedDAO = feedDAO;
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"film\"")
                 .usingGeneratedKeyColumns("id")
@@ -84,11 +86,13 @@ public class FilmDAO implements FilmStorage {
     @Override
     public void likeFilm(int userId, int filmId) {
         jdbcTemplate.update("INSERT INTO \"film_like\"(user_id, film_id) VALUES ( ?, ? ) ", userId, filmId);
+        feedDAO.writeFeed(userId, "LIKE", "ADD", filmId);
     }
 
     @Override
     public void removeLike(int userId, int filmId) {
         jdbcTemplate.update("DELETE FROM \"film_like\" WHERE USER_ID = ? AND FILM_ID = ?", userId, filmId);
+        feedDAO.writeFeed(userId, "LIKE", "REMOVE", filmId);
     }
 
     @Override
@@ -447,6 +451,4 @@ public class FilmDAO implements FilmStorage {
                 new FilmRowMapper(this),
                 userId);
     }
-
-
 }

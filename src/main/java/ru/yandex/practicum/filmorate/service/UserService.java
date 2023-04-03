@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.models.Feed;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.user.Relation;
@@ -145,5 +146,10 @@ public class UserService {
     public void deleteUserById(int id) {
         getUserById(id);
         userStorage.removeUser(id);
+    }
+
+    public List<Feed> getUserFeed(int id) {
+        getUserById(id);
+        return userStorage.getUserFeed(id);
     }
 }

@@ -6,10 +6,11 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.models.Feed;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.storage.FeedDAO;
 import ru.yandex.practicum.filmorate.storage.film.FilmDAO;
-
 import javax.sql.DataSource;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,12 +21,14 @@ public class UserDAO implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
     private final FilmDAO filmDAO;
+    private final FeedDAO feedDAO;
     private static final String SELECT_USER = "SELECT u.id, u.email, u.login, u.name, u.birthday ";
 
     @Autowired
-    public UserDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FilmDAO filmDAO) {
+    public UserDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FilmDAO filmDAO, FeedDAO feedDAO) {
         this.jdbcTemplate = jdbcTemplate;
         this.filmDAO = filmDAO;
+        this.feedDAO = feedDAO;
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"user\"")
                 .usingGeneratedKeyColumns("id")
@@ -108,18 +111,21 @@ public class UserDAO implements UserStorage {
     public void addRelation(int userId, int secondUserId) {
         jdbcTemplate.update("INSERT INTO \"friendship\"(FIRST_USER, SECOND_USER, status) VALUES ( ?, ?, ? )",
                 userId, secondUserId, 1);
+        feedDAO.writeFeed(userId, "FRIEND", "ADD", secondUserId);
     }
 
     @Override
     public void changeRelationStatus(Relation relation, int statusId) {
         jdbcTemplate.update("UPDATE \"friendship\" SET STATUS = ? WHERE FIRST_USER = ? AND SECOND_USER = ?",
                 statusId, relation.getFirstUser(), relation.getSecondUser());
+        feedDAO.writeFeed(relation.getFirstUser(), "FRIEND", "UPDATE", relation.getSecondUser());
     }
 
     @Override
     public void removeRelation(Relation relation) {
         jdbcTemplate.update("DELETE FROM \"friendship\" WHERE FIRST_USER = ? AND SECOND_USER = ?",
                 relation.getFirstUser(), relation.getSecondUser());
+        feedDAO.writeFeed(relation.getFirstUser(), "FRIEND", "REMOVE", relation.getSecondUser());
     }
 
     @Override
@@ -178,4 +184,8 @@ public class UserDAO implements UserStorage {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<Feed> getUserFeed(int userId) {
+        return feedDAO.getUserFeed(userId);
+    }
 }

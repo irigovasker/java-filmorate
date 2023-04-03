@@ -11,21 +11,19 @@ import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Review;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
-
 import javax.sql.DataSource;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Component
 public class ReviewDAO {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
+    private final FeedDAO feedDAO;
 
     @Autowired
-    public ReviewDAO(JdbcTemplate jdbcTemplate, DataSource dataSource) {
+    public ReviewDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedDAO feedDAO) {
         this.jdbcTemplate = jdbcTemplate;
+        this.feedDAO = feedDAO;
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"review\"")
                 .usingGeneratedKeyColumns("id")
@@ -51,6 +49,7 @@ public class ReviewDAO {
                 useful = 0;
             }
             setUseful(useful, review.getId());
+            feedDAO.writeFeed(review.getUserId(), "REVIEW", "ADD", review.getId());
             return review;
         }
     }
@@ -59,10 +58,14 @@ public class ReviewDAO {
         jdbcTemplate.update("UPDATE \"review\" SET CONTENT = ?, IS_POSITIVE = ? WHERE ID = ?",
                 review.getContent(), review.getIsPositive(), review.getId()
         );
-        return getById(review.getId());
+        Review review1 = getById(review.getId());
+        feedDAO.writeFeed(review1.getUserId(), "REVIEW", "UPDATE", review.getId());
+        return review1;
     }
 
     public void delete(int id) {
+        Review review = getById(id);
+        feedDAO.writeFeed(review.getUserId(), "REVIEW", "REMOVE", review.getId());
         jdbcTemplate.update("DELETE FROM \"review\" WHERE ID = ?", id);
     }
 
