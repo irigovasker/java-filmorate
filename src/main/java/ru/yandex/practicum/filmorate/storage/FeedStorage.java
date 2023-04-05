@@ -6,16 +6,17 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Feed;
+
 import javax.sql.DataSource;
 import java.util.List;
 
 @Component
-public class FeedDAO {
+public class FeedStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
     @Autowired
-    public FeedDAO(JdbcTemplate jdbcTemplate, DataSource dataSource) {
+    public FeedStorage(JdbcTemplate jdbcTemplate, DataSource dataSource) {
         this.jdbcTemplate = jdbcTemplate;
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"feed\"")
@@ -30,7 +31,7 @@ public class FeedDAO {
 
     public List<Feed> getUserFeed(int userId) {
         return jdbcTemplate.query(
-                        "SELECT * FROM \"feed\" AS f " +
+                "SELECT * FROM \"feed\" AS f " +
                         "WHERE f.USER_ID = ?",
                 new BeanPropertyRowMapper<>(Feed.class), userId
         );

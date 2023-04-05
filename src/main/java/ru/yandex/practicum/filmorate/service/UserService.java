@@ -1,8 +1,7 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.models.Feed;
 import ru.yandex.practicum.filmorate.models.Film;
@@ -16,15 +15,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Service
 @Slf4j
+@Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserStorage userStorage;
 
-    @Autowired
-    public UserService(@Qualifier("userDAO") UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
 
     public List<User> getAll() {
         return userStorage.getAll();

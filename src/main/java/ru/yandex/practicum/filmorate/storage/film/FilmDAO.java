@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Director;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
-import ru.yandex.practicum.filmorate.storage.FeedDAO;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
+
 import javax.sql.DataSource;
 import java.util.*;
 
@@ -16,13 +17,13 @@ import java.util.*;
 public class FilmDAO implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
-    private final FeedDAO feedDAO;
+    private final FeedStorage feedStorage;
     private final String selectFilm = "SELECT f.id, f.name, f.description, f.release_date, f.duration, r.ID AS rating_id, r.NAME AS rating_name ";
 
     @Autowired
-    public FilmDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedDAO feedDAO) {
+    public FilmDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedStorage feedStorage) {
         this.jdbcTemplate = jdbcTemplate;
-        this.feedDAO = feedDAO;
+        this.feedStorage = feedStorage;
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"film\"")
                 .usingGeneratedKeyColumns("id")
@@ -91,7 +92,7 @@ public class FilmDAO implements FilmStorage {
     @Override
     public void removeLike(int userId, int filmId) {
         jdbcTemplate.update("DELETE FROM \"film_like\" WHERE USER_ID = ? AND FILM_ID = ?", userId, filmId);
-        feedDAO.writeFeed(userId, "LIKE", "REMOVE", filmId);
+        feedStorage.writeFeed(userId, "LIKE", "REMOVE", filmId);
     }
 
     @Override

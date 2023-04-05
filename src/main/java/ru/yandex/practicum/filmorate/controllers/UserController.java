@@ -86,7 +86,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/feed")
-    public ResponseEntity<List<Feed>> getUserFeed(@PathVariable int id) {
-        return new ResponseEntity<>(userService.getUserFeed(id), HttpStatus.OK);
+    public List<Feed> getUserFeed(@PathVariable int id) {
+        return userService.getUserFeed(id);
     }
 }
