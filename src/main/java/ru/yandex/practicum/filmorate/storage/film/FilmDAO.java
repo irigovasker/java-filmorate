@@ -314,27 +314,6 @@ public class FilmDAO implements FilmStorage {
     }
 
     @Override
-    public List<Film> getMostPopularFilms(int genreId, int year) {
-
-        return jdbcTemplate.query(
-                selectFilm +
-                        "FROM (" +
-                        "SELECT DISTINCT f.ID, count(fl.USER_ID) " +
-                        "FROM \"film\" AS f " +
-                        "LEFT JOIN \"film_like\" AS fl ON f.ID = fl.FILM_ID " +
-                        "GROUP BY f.ID " +
-                        "ORDER BY count(fl.USER_ID) DESC " +
-                        "LIMIT 10 " +
-                        ") AS fl " +
-                        "LEFT JOIN \"film\" AS f ON fl.ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID " +
-                        "LEFT JOIN \"film_genre\" AS fg on fl.ID = fg.FILM_ID " +
-                        "LEFT JOIN \"genre\" AS g on g.ID = fg.GENRE_ID " +
-                        "WHERE fg.GENRE_ID = ? AND f.RELEASE_DATE LIKE ?",
-                new FilmRowMapper(this), genreId, year + "%");
-    }
-
-    @Override
     public List<Film> getMostPopularFilms(int size, int genreId, int year) {
         return jdbcTemplate.query(
                 selectFilm +
@@ -355,27 +334,6 @@ public class FilmDAO implements FilmStorage {
     }
 
     @Override
-    public List<Film> getMostPopularFilmsByGenre(int genreId) {
-
-        return jdbcTemplate.query(
-                selectFilm +
-                        "FROM (" +
-                        "SELECT DISTINCT f.ID, count(fl.USER_ID) " +
-                        "FROM \"film\" AS f " +
-                        "LEFT JOIN \"film_like\" AS fl ON f.ID = fl.FILM_ID " +
-                        "GROUP BY f.ID " +
-                        "ORDER BY count(fl.USER_ID) DESC " +
-                        "LIMIT 10 " +
-                        ") AS fl " +
-                        "LEFT JOIN \"film\" AS f ON fl.ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID " +
-                        "LEFT JOIN \"film_genre\" AS fg on fl.ID = fg.FILM_ID " +
-                        "LEFT JOIN \"genre\" AS g on g.ID = fg.GENRE_ID " +
-                        "WHERE fg.GENRE_ID = ?",
-                new FilmRowMapper(this), genreId);
-    }
-
-    @Override
     public List<Film> getMostPopularFilmsByGenre(int size, int genreId) {
         return jdbcTemplate.query(
                 selectFilm +
@@ -393,26 +351,6 @@ public class FilmDAO implements FilmStorage {
                         "LEFT JOIN \"genre\" AS g on g.ID = fg.GENRE_ID " +
                         "WHERE fg.GENRE_ID = ?",
                 new FilmRowMapper(this), size, genreId);
-    }
-
-    @Override
-    public List<Film> getMostPopularFilmsByYear(int year) {
-
-        return jdbcTemplate.query(
-
-                selectFilm +
-                        "FROM (" +
-                        "SELECT DISTINCT f.ID, count(fl.USER_ID) " +
-                        "FROM \"film\" AS f " +
-                        "LEFT JOIN \"film_like\" AS fl ON f.ID = fl.FILM_ID " +
-                        "GROUP BY f.ID " +
-                        "ORDER BY count(fl.USER_ID) DESC " +
-                        "LIMIT 10  " +
-                        ") AS fl " +
-                        "LEFT JOIN \"film\" AS f ON fl.ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID " +
-                        "WHERE f.RELEASE_DATE LIKE ?",
-                new FilmRowMapper(this), year + "%");
     }
 
     @Override

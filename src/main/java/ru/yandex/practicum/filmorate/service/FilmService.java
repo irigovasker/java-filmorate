@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.relational.core.sql.In;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
@@ -20,6 +21,13 @@ public class FilmService {
     private final UserStorage userStorage;
     private final DirectorStorage directorStorage;
     private final FeedStorage feedStorage;
+
+    private static final String TITLE = "title";
+    private static final String DIRECTOR = "director";
+
+
+//    private final List<String> SEARCHVALUES = List.of("title",
+//            );
 
 
     public List<Film> getAll() {
@@ -42,16 +50,24 @@ public class FilmService {
     }
 
     public List<Film> search(String query, String by) {
-        switch (by) {
-            case "title":
-                return filmStorage.searchByTitle(query);
-            case "director":
-                return filmStorage.searchByDirector(query);
-            case "title,director":
-            case "director,title":
-                return filmStorage.searchByTitleDirector(query);
-            default:
+
+        List<String> byList = List.of(by.split(","));
+
+        switch (byList.size()) {
+            case 1:
+                if (TITLE.contains(by)) {
+                    return filmStorage.searchByTitle(query);
+                } else if (DIRECTOR.contains(by)) {
+                    return filmStorage.searchByDirector(query);
+                }
                 throw new ObjectNotFoundException("Невалидный поиск");
+            case 2:
+                if (byList.contains(TITLE) & byList.contains(DIRECTOR)) {
+                    return filmStorage.searchByTitleDirector(query);
+                }
+                throw new ObjectNotFoundException("Невалидный поиск");
+            default:
+                throw new ObjectNotFoundException("Неверное количество параметров 'By'");
         }
     }
 
@@ -83,14 +99,6 @@ public class FilmService {
         }
     }
 
-    public List<Film> getMostPopularFilms() {
-        return filmStorage.getMostPopularFilms();
-    }
-
-    public List<Film> getMostPopularFilms(int size) {
-        return filmStorage.getMostPopularFilms(size);
-    }
-
     public List<Film> getCommonFilms(int userId, int friendId) {
         return filmStorage.getCommonFilms(userId, friendId);
     }
@@ -109,28 +117,15 @@ public class FilmService {
         return filmStorage.getDirectorsFilmsSortByLikes(directorId);
     }
 
-    public List<Film> getMostPopularFilms(int genreId, int year) {
-        return filmStorage.getMostPopularFilms(genreId, year);
-    }
-
-    public List<Film> getMostPopularFilms(int size, int genreId, int year) {
-        return filmStorage.getMostPopularFilms(size, genreId, year);
-    }
-
-    public List<Film> getMostPopularFilmsByGenre(int genreId) {
-        return filmStorage.getMostPopularFilmsByGenre(genreId);
-    }
-
-    public List<Film> getMostPopularFilmsByGenre(int size, int genreId) {
-        return filmStorage.getMostPopularFilmsByGenre(size, genreId);
-    }
-
-    public List<Film> getMostPopularFilmsByYear(int year) {
-        return filmStorage.getMostPopularFilmsByYear(year);
-    }
-
-    public List<Film> getMostPopularFilmsByYear(int size, int year) {
-        return filmStorage.getMostPopularFilmsByYear(size, year);
+    public List<Film> getMostPopularFilms(Integer size, Integer genreId, Integer year) {
+        if (genreId != null & year != null) {
+            return filmStorage.getMostPopularFilms(size, genreId, year);
+        } else if (genreId != null) {
+            return filmStorage.getMostPopularFilmsByGenre(size, genreId);
+        } else if (year != null) {
+            return filmStorage.getMostPopularFilmsByYear(size, year);
+        }
+        return filmStorage.getMostPopularFilms(size);
     }
 
     public void deleteFilmById(int filmId) {

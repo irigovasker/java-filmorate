@@ -61,29 +61,10 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilm(@RequestParam(name = "count") Optional<Integer> count,
-                                     @RequestParam(name = "genreId") Optional<Integer> genreId,
-                                     @RequestParam(name = "year") Optional<Integer> year) {
-        if (count.isPresent()) {
-            if (genreId.isPresent() && year.isPresent()) {
-                return filmService.getMostPopularFilms(count.get(), genreId.get(), year.get());
-            } else if (genreId.isPresent()) {
-                return filmService.getMostPopularFilmsByGenre(count.get(), genreId.get());
-            } else if (year.isPresent()) {
-                return filmService.getMostPopularFilmsByYear(count.get(), year.get());
-            } else {
-                return filmService.getMostPopularFilms(count.get());
-            }
-        } else {
-            if (genreId.isPresent() && year.isPresent()) {
-                return filmService.getMostPopularFilms(genreId.get(), year.get());
-            } else if (genreId.isPresent()) {
-                return filmService.getMostPopularFilmsByGenre(genreId.get());
-            } else if (year.isPresent()) {
-                return filmService.getMostPopularFilmsByYear(year.get());
-            }
-        }
-        return filmService.getMostPopularFilms();
+    public List<Film> getPopularFilm(@RequestParam(name = "count", defaultValue = "10") Integer count,
+                                     @RequestParam(name = "genreId", required = false) Integer genreId,
+                                     @RequestParam(name = "year", required = false) Integer year) {
+        return filmService.getMostPopularFilms(count, genreId, year);
     }
 
     @GetMapping("/common")

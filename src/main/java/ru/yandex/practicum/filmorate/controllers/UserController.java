@@ -66,18 +66,18 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public ResponseEntity<List<User>> getUsersFriends(@PathVariable int id) {
-        return new ResponseEntity<>(userService.getUserFriends(id), HttpStatus.OK);
+    public List<User> getUsersFriends(@PathVariable int id) {
+        return userService.getUserFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public ResponseEntity<List<User>> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
-        return new ResponseEntity<>(userService.getCommonFriend(id, otherId), HttpStatus.OK);
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return userService.getCommonFriend(id, otherId);
     }
 
     @GetMapping("/{userId}/recommendations")
-    public ResponseEntity<List<Film>> showRecommendedFilms(@PathVariable int userId) {
-        return new ResponseEntity<>(userService.getSimilarUsers(userId), HttpStatus.OK);
+    public List<Film> showRecommendedFilms(@PathVariable int userId) {
+        return userService.getSimilarUsers(userId);
     }
 
     @DeleteMapping("/{userId}")
