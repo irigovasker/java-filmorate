@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.util.Validator;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
