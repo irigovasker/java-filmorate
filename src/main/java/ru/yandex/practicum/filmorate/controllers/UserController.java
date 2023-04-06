@@ -2,8 +2,6 @@ package ru.yandex.practicum.filmorate.controllers;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.models.Feed;
@@ -66,18 +64,18 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public ResponseEntity<List<User>> getUsersFriends(@PathVariable int id) {
-        return new ResponseEntity<>(userService.getUserFriends(id), HttpStatus.OK);
+    public List<User> getUsersFriends(@PathVariable int id) {
+        return userService.getUserFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public ResponseEntity<List<User>> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
-        return new ResponseEntity<>(userService.getCommonFriend(id, otherId), HttpStatus.OK);
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return userService.getCommonFriend(id, otherId);
     }
 
     @GetMapping("/{userId}/recommendations")
-    public ResponseEntity<List<Film>> showRecommendedFilms(@PathVariable int userId) {
-        return new ResponseEntity<>(userService.getSimilarUsers(userId), HttpStatus.OK);
+    public List<Film> showRecommendedFilms(@PathVariable int userId) {
+        return userService.getSimilarUsers(userId);
     }
 
     @DeleteMapping("/{userId}")
@@ -86,7 +84,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/feed")
-    public ResponseEntity<List<Feed>> getUserFeed(@PathVariable int id) {
-        return new ResponseEntity<>(userService.getUserFeed(id), HttpStatus.OK);
+    public List<Feed> getUserFeed(@PathVariable int id) {
+        return userService.getUserFeed(id);
     }
 }

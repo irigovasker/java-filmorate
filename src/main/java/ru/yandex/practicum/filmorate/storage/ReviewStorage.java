@@ -11,19 +11,20 @@ import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Review;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
+
 import javax.sql.DataSource;
 import java.util.*;
 
 @Component
-public class ReviewDAO {
+public class ReviewStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
-    private final FeedDAO feedDAO;
+    private final FeedStorage feedStorage;
 
     @Autowired
-    public ReviewDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedDAO feedDAO) {
+    public ReviewStorage(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedStorage feedStorage) {
         this.jdbcTemplate = jdbcTemplate;
-        this.feedDAO = feedDAO;
+        this.feedStorage = feedStorage;
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"review\"")
                 .usingGeneratedKeyColumns("id")
@@ -49,7 +50,7 @@ public class ReviewDAO {
                 useful = 0;
             }
             setUseful(useful, review.getId());
-            feedDAO.writeFeed(review.getUserId(), "REVIEW", "ADD", review.getId());
+            feedStorage.writeFeed(review.getUserId(), "REVIEW", "ADD", review.getId());
             return review;
         }
     }
@@ -59,13 +60,13 @@ public class ReviewDAO {
                 review.getContent(), review.getIsPositive(), review.getId()
         );
         Review review1 = getById(review.getId());
-        feedDAO.writeFeed(review1.getUserId(), "REVIEW", "UPDATE", review.getId());
+        feedStorage.writeFeed(review1.getUserId(), "REVIEW", "UPDATE", review.getId());
         return review1;
     }
 
     public void delete(int id) {
         Review review = getById(id);
-        feedDAO.writeFeed(review.getUserId(), "REVIEW", "REMOVE", review.getId());
+        feedStorage.writeFeed(review.getUserId(), "REVIEW", "REMOVE", review.getId());
         jdbcTemplate.update("DELETE FROM \"review\" WHERE ID = ?", id);
     }
 
@@ -112,18 +113,18 @@ public class ReviewDAO {
     }
 
     public boolean isUser(int userId) {
-           Optional<User> user = jdbcTemplate.query(
-                    "SELECT * FROM \"user\" WHERE ID = ?",
-                           new BeanPropertyRowMapper<>(User.class), userId)
-                    .stream().findAny();
+        Optional<User> user = jdbcTemplate.query(
+                        "SELECT * FROM \"user\" WHERE ID = ?",
+                        new BeanPropertyRowMapper<>(User.class), userId)
+                .stream().findAny();
         return user.isPresent();
     }
 
     public boolean isFilm(int filmId) {
-           Optional<Film> film = jdbcTemplate.query(
-                    "SELECT * FROM \"film\" AS f " +
-                            "LEFT JOIN \"rating\" r on f.RATING_ID = r.ID " +
-                            "WHERE f.ID = ?", new BeanPropertyRowMapper<>(Film.class), filmId).stream().findAny();
+        Optional<Film> film = jdbcTemplate.query(
+                "SELECT * FROM \"film\" AS f " +
+                        "LEFT JOIN \"rating\" r on f.RATING_ID = r.ID " +
+                        "WHERE f.ID = ?", new BeanPropertyRowMapper<>(Film.class), filmId).stream().findAny();
         return film.isPresent();
     }
 }

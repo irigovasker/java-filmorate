@@ -8,7 +8,6 @@ import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/reviews")
@@ -34,18 +33,9 @@ public class ReviewController {
     }
 
     @GetMapping
-    public List<Review> getReviewsByFilmId(@RequestParam(name = "filmId", required = false) Optional<Integer> filmId,
-                                           @RequestParam(name = "count", required = false) Optional<Integer> count) {
-        int id = -1;
-        int c = 10;
-
-        if (count.isPresent()) {
-            c = count.get();
-        }
-        if (filmId.isPresent()) {
-            id = filmId.get();
-        }
-        return reviewService.getByFilmId(id, c);
+    public List<Review> getReviewsByFilmId(@RequestParam(name = "filmId", defaultValue = "-1") Integer filmId,
+                                           @RequestParam(name = "count", defaultValue = "10") Integer count) {
+        return reviewService.getByFilmId(filmId, count);
     }
 
     @DeleteMapping("/{id}")

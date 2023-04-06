@@ -1,21 +1,17 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.models.Review;
-import ru.yandex.practicum.filmorate.storage.ReviewDAO;
+import ru.yandex.practicum.filmorate.storage.ReviewStorage;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ReviewService {
+    private final ReviewStorage reviewStorage;
 
-    private final ReviewDAO reviewStorage;
-
-    @Autowired
-    public ReviewService(ReviewDAO reviewStorage) {
-        this.reviewStorage = reviewStorage;
-    }
 
     public Review create(Review review) {
         return reviewStorage.create(review);

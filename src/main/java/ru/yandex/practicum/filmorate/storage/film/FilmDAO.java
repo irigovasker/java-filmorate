@@ -8,7 +8,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Director;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
-import ru.yandex.practicum.filmorate.storage.FeedDAO;
+import ru.yandex.practicum.filmorate.storage.FeedStorage;
+
 import javax.sql.DataSource;
 import java.util.*;
 
@@ -16,13 +17,13 @@ import java.util.*;
 public class FilmDAO implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
-    private final FeedDAO feedDAO;
+    private final FeedStorage feedStorage;
     private final String selectFilm = "SELECT f.id, f.name, f.description, f.release_date, f.duration, r.ID AS rating_id, r.NAME AS rating_name ";
 
     @Autowired
-    public FilmDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedDAO feedDAO) {
+    public FilmDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedStorage feedStorage) {
         this.jdbcTemplate = jdbcTemplate;
-        this.feedDAO = feedDAO;
+        this.feedStorage = feedStorage;
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"film\"")
                 .usingGeneratedKeyColumns("id")
@@ -91,7 +92,7 @@ public class FilmDAO implements FilmStorage {
     @Override
     public void removeLike(int userId, int filmId) {
         jdbcTemplate.update("DELETE FROM \"film_like\" WHERE USER_ID = ? AND FILM_ID = ?", userId, filmId);
-        feedDAO.writeFeed(userId, "LIKE", "REMOVE", filmId);
+        feedStorage.writeFeed(userId, "LIKE", "REMOVE", filmId);
     }
 
     @Override
@@ -313,27 +314,6 @@ public class FilmDAO implements FilmStorage {
     }
 
     @Override
-    public List<Film> getMostPopularFilms(int genreId, int year) {
-
-        return jdbcTemplate.query(
-                selectFilm +
-                        "FROM (" +
-                        "SELECT DISTINCT f.ID, count(fl.USER_ID) " +
-                        "FROM \"film\" AS f " +
-                        "LEFT JOIN \"film_like\" AS fl ON f.ID = fl.FILM_ID " +
-                        "GROUP BY f.ID " +
-                        "ORDER BY count(fl.USER_ID) DESC " +
-                        "LIMIT 10 " +
-                        ") AS fl " +
-                        "LEFT JOIN \"film\" AS f ON fl.ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID " +
-                        "LEFT JOIN \"film_genre\" AS fg on fl.ID = fg.FILM_ID " +
-                        "LEFT JOIN \"genre\" AS g on g.ID = fg.GENRE_ID " +
-                        "WHERE fg.GENRE_ID = ? AND f.RELEASE_DATE LIKE ?",
-                new FilmRowMapper(this), genreId, year + "%");
-    }
-
-    @Override
     public List<Film> getMostPopularFilms(int size, int genreId, int year) {
         return jdbcTemplate.query(
                 selectFilm +
@@ -354,27 +334,6 @@ public class FilmDAO implements FilmStorage {
     }
 
     @Override
-    public List<Film> getMostPopularFilmsByGenre(int genreId) {
-
-        return jdbcTemplate.query(
-                selectFilm +
-                        "FROM (" +
-                        "SELECT DISTINCT f.ID, count(fl.USER_ID) " +
-                        "FROM \"film\" AS f " +
-                        "LEFT JOIN \"film_like\" AS fl ON f.ID = fl.FILM_ID " +
-                        "GROUP BY f.ID " +
-                        "ORDER BY count(fl.USER_ID) DESC " +
-                        "LIMIT 10 " +
-                        ") AS fl " +
-                        "LEFT JOIN \"film\" AS f ON fl.ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID " +
-                        "LEFT JOIN \"film_genre\" AS fg on fl.ID = fg.FILM_ID " +
-                        "LEFT JOIN \"genre\" AS g on g.ID = fg.GENRE_ID " +
-                        "WHERE fg.GENRE_ID = ?",
-                new FilmRowMapper(this), genreId);
-    }
-
-    @Override
     public List<Film> getMostPopularFilmsByGenre(int size, int genreId) {
         return jdbcTemplate.query(
                 selectFilm +
@@ -392,26 +351,6 @@ public class FilmDAO implements FilmStorage {
                         "LEFT JOIN \"genre\" AS g on g.ID = fg.GENRE_ID " +
                         "WHERE fg.GENRE_ID = ?",
                 new FilmRowMapper(this), size, genreId);
-    }
-
-    @Override
-    public List<Film> getMostPopularFilmsByYear(int year) {
-
-        return jdbcTemplate.query(
-
-                selectFilm +
-                        "FROM (" +
-                        "SELECT DISTINCT f.ID, count(fl.USER_ID) " +
-                        "FROM \"film\" AS f " +
-                        "LEFT JOIN \"film_like\" AS fl ON f.ID = fl.FILM_ID " +
-                        "GROUP BY f.ID " +
-                        "ORDER BY count(fl.USER_ID) DESC " +
-                        "LIMIT 10  " +
-                        ") AS fl " +
-                        "LEFT JOIN \"film\" AS f ON fl.ID = f.ID " +
-                        "LEFT JOIN \"rating\" AS r ON f.RATING_ID = r.ID " +
-                        "WHERE f.RELEASE_DATE LIKE ?",
-                new FilmRowMapper(this), year + "%");
     }
 
     @Override

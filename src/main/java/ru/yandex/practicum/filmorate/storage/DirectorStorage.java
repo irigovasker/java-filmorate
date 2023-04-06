@@ -13,12 +13,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class DirectorDAO {
+public class DirectorStorage {
     private final JdbcTemplate template;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
     @Autowired
-    public DirectorDAO(JdbcTemplate template, DataSource dataSource) {
+    public DirectorStorage(JdbcTemplate template, DataSource dataSource) {
         this.template = template;
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"director\"")

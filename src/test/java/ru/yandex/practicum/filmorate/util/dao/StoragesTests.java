@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.util.dao;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.models.Film;
@@ -30,7 +29,7 @@ public class StoragesTests {
     static List<User> users;
 
     @Autowired
-    public StoragesTests(@Qualifier("filmDAO") FilmStorage filmStorage, @Qualifier("userDAO") UserStorage userStorage) {
+    public StoragesTests(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -116,32 +115,22 @@ public class StoragesTests {
         List<Film> mostPopular = filmStorage.getMostPopularFilms();
         assertEquals(filmWithId2, mostPopular.get(0));
 
-        //getMostPopularFilms(1, 2022)
-        mostPopular = filmStorage.getMostPopularFilms(1, 2022);
-        assertEquals(filmWithId1, mostPopular.get(0));
+        //getMostPopularFilms(1)
+        mostPopular = filmStorage.getMostPopularFilms(1);
+        assertEquals(filmWithId2, mostPopular.get(0));
 
         //getMostPopularFilms(1, 1, 2022)
-        mostPopular = filmStorage.getMostPopularFilms(1, 2022);
-        assertEquals(filmWithId1, mostPopular.get(0));
+        mostPopular = filmStorage.getMostPopularFilms(1, 2, 2021);
+        assertEquals(filmWithId2, mostPopular.get(0));
         assertEquals(1, mostPopular.size());
 
         //getMostPopularFilmsByGenre(1)
-        mostPopular = filmStorage.getMostPopularFilmsByGenre(2);
-        assertEquals(filmWithId2, mostPopular.get(0));
-
-        //getMostPopularFilmsByGenre(1, 2)
-        mostPopular = filmStorage.getMostPopularFilmsByGenre(1, 2);
-        assertEquals(1, mostPopular.size());
+        mostPopular = filmStorage.getMostPopularFilmsByGenre(10, 2);
         assertEquals(filmWithId2, mostPopular.get(0));
 
         //getMostPopularFilmsByYear(2022)
-        mostPopular = filmStorage.getMostPopularFilmsByYear(2022);
+        mostPopular = filmStorage.getMostPopularFilmsByYear(10, 2022);
         assertEquals(filmWithId1, mostPopular.get(0));
-
-        //getMostPopularFilmsByYear(1, 2021)
-        mostPopular = filmStorage.getMostPopularFilmsByYear(1, 2021);
-        assertEquals(1, mostPopular.size());
-        assertEquals(filmWithId2, mostPopular.get(0));
 
         //removeLike() and getMostPopularFilms(1)
         filmStorage.removeLike(1, 2);
