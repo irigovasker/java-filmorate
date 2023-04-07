@@ -10,7 +10,6 @@ import ru.yandex.practicum.filmorate.models.Genre;
 import ru.yandex.practicum.filmorate.models.Rating;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.Relation;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -154,20 +153,13 @@ public class StoragesTests {
         assertEquals("updateName", userFromDB.getName());
         assertEquals("update@email.com", userFromDB.getEmail());
 
-        //addRelation() and getUserFriends() and getSubscribers()
-        userStorage.addRelation(1, 2);
-        assertEquals(2, userStorage.getUserFriends(1).get(0).getId());
-        assertEquals(1, userStorage.getSubscribers(2).get(0).getId());
-
-        //changeRelationStatus() and getRelation()
-        Relation relation = userStorage.getRelation(1, 2);
-        userStorage.changeRelationStatus(relation, 3);
+        //addFriends() and getUserFriends()
+        userStorage.addFriend(1, 2);
         assertEquals(1, userStorage.getUserFriends(2).get(0).getId());
 
-        //removeRelation()
-        userStorage.removeRelation(relation);
+        //removeFriend()
+        userStorage.removeFriend(1, 2);
         assertEquals(0, userStorage.getUserFriends(1).size());
-        assertEquals(0, userStorage.getUserFriends(2).size());
 
         //removeUser()
         userStorage.removeUser(1);
