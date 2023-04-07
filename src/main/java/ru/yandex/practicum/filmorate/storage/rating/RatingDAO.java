@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.rating;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -11,14 +11,16 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class RatingStorage {
+public class RatingDAO implements RatingStorage {
     private final JdbcTemplate jdbcTemplate;
 
 
+    @Override
     public List<Rating> getAllRatings() {
         return jdbcTemplate.query("SELECT * FROM \"rating\" ", new BeanPropertyRowMapper<>(Rating.class));
     }
 
+    @Override
     public Rating getRatingById(int id) {
         return jdbcTemplate.query("SELECT * FROM \"rating\" WHERE id = ?", new BeanPropertyRowMapper<>(Rating.class), id)
                 .stream().findAny().orElseThrow(() -> new ObjectNotFoundException("Несуществующий рейтинг"));

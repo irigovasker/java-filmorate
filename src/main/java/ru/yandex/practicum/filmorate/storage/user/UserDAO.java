@@ -9,8 +9,9 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Feed;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
-import ru.yandex.practicum.filmorate.storage.FeedStorage;
+import ru.yandex.practicum.filmorate.storage.feed.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmDAO;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import javax.sql.DataSource;
 import java.util.*;
@@ -21,14 +22,14 @@ import java.util.stream.Collectors;
 public class UserDAO implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
-    private final FilmDAO filmDAO;
+    private final FilmStorage filmStorage;
     private final FeedStorage feedStorage;
     private static final String SELECT_USER = "SELECT u.id, u.email, u.login, u.name, u.birthday ";
 
     @Autowired
-    public UserDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FilmDAO filmDAO, FeedStorage feedStorage) {
+    public UserDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FilmStorage filmStorage, FeedStorage feedStorage) {
         this.jdbcTemplate = jdbcTemplate;
-        this.filmDAO = filmDAO;
+        this.filmStorage = filmStorage;
         this.feedStorage = feedStorage;
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"user\"")
@@ -71,62 +72,36 @@ public class UserDAO implements UserStorage {
     public List<User> getUserFriends(int userId) {
         return jdbcTemplate.query(
                 SELECT_USER +
-                        "FROM \"friendship\" AS f " +
-                        "LEFT JOIN \"user\" AS u ON f.SECOND_USER = u.ID " +
-                        "WHERE f.FIRST_USER = ? AND (f.STATUS = 1 OR f.STATUS = 3) " +
-                        "UNION " +
-                        SELECT_USER +
-                        "FROM \"friendship\" AS f " +
-                        "LEFT JOIN \"user\" AS u ON f.FIRST_USER = u.ID " +
-                        "WHERE f.SECOND_USER = ? AND (f.STATUS = 2 OR f.STATUS = 3)",
-                new BeanPropertyRowMapper<>(User.class), userId, userId
+                        "FROM \"user\" AS u INNER JOIN \"friends\" AS f ON u.id = f.friend_id WHERE f.user_id = ?",
+                new BeanPropertyRowMapper<>(User.class), userId
         );
     }
 
     @Override
-    public List<User> getSubscribers(int userId) {
-        return jdbcTemplate.query(
-                SELECT_USER +
-                        "FROM \"friendship\" AS f " +
-                        "LEFT JOIN \"user\" AS u ON f.SECOND_USER = u.ID " +
-                        "WHERE f.FIRST_USER = ? AND f.STATUS = 2 " +
-                        "UNION " +
-                        SELECT_USER +
-                        "FROM \"friendship\" AS f " +
-                        "LEFT JOIN \"user\" AS u ON f.FIRST_USER = u.ID " +
-                        "WHERE f.SECOND_USER = ? AND f.STATUS = 1 ",
-                new BeanPropertyRowMapper<>(User.class), userId, userId
-        );
+    public void addFriend(int userId, int friendId) {
+        String sqlQuery = "INSERT INTO \"friends\" (USER_ID, FRIEND_ID) " +
+                "VALUES (?, ?)";
+        jdbcTemplate.update(sqlQuery,
+                friendId,
+                userId);
+        feedStorage.writeFeed(friendId, "FRIEND", "ADD", userId);
     }
 
     @Override
-    public Relation getRelation(int userId, int secondUserId) {
-        return jdbcTemplate.query(
-                        "SELECT * FROM \"friendship\" " +
-                                "WHERE (FIRST_USER = ? AND SECOND_USER = ?) OR (SECOND_USER = ? AND FIRST_USER = ?) ",
-                        new BeanPropertyRowMapper<>(Relation.class), userId, secondUserId, secondUserId, userId)
-                .stream().findAny().orElse(null);
+    public List<User> getCommonFriend(int userId, int friendId) {
+        String sql = "SELECT * FROM \"friends\" AS f1 INNER JOIN \"friends\" AS f2 ON f1.friend_id = f2.friend_id " +
+                "INNER JOIN \"user\" AS u ON f2.friend_id = u.id " +
+                "WHERE f1.user_id = ? AND f2.user_id = ?";
+        return jdbcTemplate.query(sql, new BeanPropertyRowMapper<>(User.class), userId, friendId);
     }
 
     @Override
-    public void addRelation(int userId, int secondUserId) {
-        jdbcTemplate.update("INSERT INTO \"friendship\"(FIRST_USER, SECOND_USER, status) VALUES ( ?, ?, ? )",
-                userId, secondUserId, 1);
-        feedStorage.writeFeed(userId, "FRIEND", "ADD", secondUserId);
-    }
-
-    @Override
-    public void changeRelationStatus(Relation relation, int statusId) {
-        jdbcTemplate.update("UPDATE \"friendship\" SET STATUS = ? WHERE FIRST_USER = ? AND SECOND_USER = ?",
-                statusId, relation.getFirstUser(), relation.getSecondUser());
-        feedStorage.writeFeed(relation.getFirstUser(), "FRIEND", "UPDATE", relation.getSecondUser());
-    }
-
-    @Override
-    public void removeRelation(Relation relation) {
-        jdbcTemplate.update("DELETE FROM \"friendship\" WHERE FIRST_USER = ? AND SECOND_USER = ?",
-                relation.getFirstUser(), relation.getSecondUser());
-        feedStorage.writeFeed(relation.getFirstUser(), "FRIEND", "REMOVE", relation.getSecondUser());
+    public boolean removeFriend(int userId, int friendId) {
+        feedStorage.writeFeed(userId, "FRIEND", "REMOVE", friendId);
+        String sqlQueryDelete = "DELETE FROM \"friends\" WHERE user_id = ? AND friend_id = ?";
+        return jdbcTemplate.update(sqlQueryDelete,
+                userId,
+                friendId) == 1;
     }
 
     @Override
@@ -166,11 +141,11 @@ public class UserDAO implements UserStorage {
 
         log.info("Method: getSimilarUsers; List of users: {}", similarUsers);
 
-        List<Film> likedMovies = filmDAO.getLikedFilms(userId);
+        List<Film> likedMovies = filmStorage.getLikedFilms(userId);
 
         Map<Film, Integer> recommendations = new HashMap<>();
         for (Integer similarUser : similarUsers) {
-            List<Film> similarUserLikedMovies = filmDAO.getLikedFilms(similarUser);
+            List<Film> similarUserLikedMovies = filmStorage.getLikedFilms(similarUser);
             for (Film movie : similarUserLikedMovies) {
                 if (!likedMovies.contains(movie)) {
                     int count = recommendations.getOrDefault(movie, 0);

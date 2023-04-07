@@ -18,15 +18,15 @@ public interface UserStorage {
 
     List<User> getUserFriends(int userId);
 
-    List<User> getSubscribers(int userId);
+    //List<User> getSubscribers(int userId);
 
-    Relation getRelation(int userId, int secondUserId);
+    //Relation getRelation(int userId, int secondUserId);
 
-    void addRelation(int userId, int secondUserId);
+    void addFriend(int userId, int friendId);
 
-    void changeRelationStatus(Relation relation, int statusId);
+    boolean removeFriend(int userId, int friendId);
 
-    void removeRelation(Relation relation);
+    List<User> getCommonFriend(int userId, int friendId);
 
     void removeUser(int id);
 

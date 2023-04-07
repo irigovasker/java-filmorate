@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.director;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -13,12 +13,12 @@ import java.util.Map;
 import java.util.Optional;
 
 @Component
-public class DirectorStorage {
+public class DirectorDAO implements DirectorStorage {
     private final JdbcTemplate template;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
     @Autowired
-    public DirectorStorage(JdbcTemplate template, DataSource dataSource) {
+    public DirectorDAO(JdbcTemplate template, DataSource dataSource) {
         this.template = template;
         this.simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"director\"")
@@ -26,12 +26,14 @@ public class DirectorStorage {
                 .usingColumns("name");
     }
 
+    @Override
     public List<Director> findAll() {
         return template.query(
                 "SELECT * FROM \"director\" ", new BeanPropertyRowMapper<>(Director.class)
         );
     }
 
+    @Override
     public Optional<Director> findOneById(int id) {
         return template.query(
                 "SELECT * FROM \"director\" WHERE id = ?",
@@ -39,11 +41,13 @@ public class DirectorStorage {
         ).stream().findAny();
     }
 
+    @Override
     public Director createDirector(Director director) {
         director.setId(simpleJdbcInsert.executeAndReturnKey(Map.of("name", director.getName())).intValue());
         return director;
     }
 
+    @Override
     public Director updateDirector(Director director) {
         template.update(
                 "UPDATE \"director\" SET name = ? WHERE id = ? ", director.getName(), director.getId()
@@ -51,6 +55,7 @@ public class DirectorStorage {
         return director;
     }
 
+    @Override
     public void deleteDirectorById(int id) {
         template.update("DELETE FROM \"director\" WHERE id = ? ", id);
     }

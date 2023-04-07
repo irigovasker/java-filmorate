@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.feed;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -11,12 +11,12 @@ import javax.sql.DataSource;
 import java.util.List;
 
 @Component
-public class FeedStorage {
+public class FeedDAO implements FeedStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
     @Autowired
-    public FeedStorage(JdbcTemplate jdbcTemplate, DataSource dataSource) {
+    public FeedDAO(JdbcTemplate jdbcTemplate, DataSource dataSource) {
         this.jdbcTemplate = jdbcTemplate;
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"feed\"")
@@ -24,11 +24,13 @@ public class FeedStorage {
                 .usingColumns("timestamp", "user_id", "event_type", "operation", "entity_id");
     }
 
+    @Override
     public void writeFeed(int userId, String eventType, String operation, Integer entityId) {
         jdbcTemplate.update("INSERT INTO \"feed\" (timestamp, user_id, event_type, operation, entity_id) VALUES ( ?, ?, ?, ?, ? )",
                 System.currentTimeMillis(), userId, eventType, operation, entityId);
     }
 
+    @Override
     public List<Feed> getUserFeed(int userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM \"feed\" AS f " +

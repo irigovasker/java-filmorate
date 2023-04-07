@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.genre;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -11,14 +11,16 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class GenreStorage {
+public class GenreDAO implements GenreStorage {
     private final JdbcTemplate jdbcTemplate;
 
 
+    @Override
     public List<Genre> getAllGenres() {
         return jdbcTemplate.query("SELECT * FROM \"genre\" ", new BeanPropertyRowMapper<>(Genre.class));
     }
 
+    @Override
     public Genre getGenreById(int id) {
         return jdbcTemplate.query("SELECT * FROM \"genre\" WHERE id =?",
                         new BeanPropertyRowMapper<>(Genre.class), id)
