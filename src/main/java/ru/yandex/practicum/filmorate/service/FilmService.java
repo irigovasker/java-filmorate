@@ -5,8 +5,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
-import ru.yandex.practicum.filmorate.storage.DirectorStorage;
-import ru.yandex.practicum.filmorate.storage.FeedStorage;
+import ru.yandex.practicum.filmorate.storage.director.DirectorStorage;
+import ru.yandex.practicum.filmorate.storage.feed.FeedStorage;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
@@ -24,14 +24,10 @@ public class FilmService {
     private static final String TITLE = "title";
     private static final String DIRECTOR = "director";
 
-
-//    private final List<String> SEARCHVALUES = List.of("title",
-//            );
-
-
     public List<Film> getAll() {
         return filmStorage.getAll();
     }
+
 
     public Film getFilmById(int id) {
         return filmStorage.getFilmById(id).orElseThrow(() -> new ObjectNotFoundException("Несуществующий фильм"));

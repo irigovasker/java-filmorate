@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.models.Director;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Genre;
-import ru.yandex.practicum.filmorate.storage.FeedStorage;
+import ru.yandex.practicum.filmorate.storage.feed.FeedStorage;
 
 import javax.sql.DataSource;
 import java.util.*;

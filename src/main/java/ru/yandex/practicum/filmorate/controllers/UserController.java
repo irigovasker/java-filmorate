@@ -11,8 +11,6 @@ import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.util.ErrorsUtil;
 import ru.yandex.practicum.filmorate.util.Validator;
 
-
-import javax.swing.*;
 import javax.validation.Valid;
 import java.util.List;
 

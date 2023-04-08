@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.models;
 
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,7 +24,6 @@ public class User {
     private String name;
     private LocalDate birthday;
     private Set<Integer> friends;
-    private Set<Integer> subscribers;
 
     @Override
     public boolean equals(Object o) {

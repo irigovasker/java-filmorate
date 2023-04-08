@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.review;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,27 +10,29 @@ import org.springframework.web.client.HttpClientErrorException;
 import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.Review;
 import ru.yandex.practicum.filmorate.models.User;
+import ru.yandex.practicum.filmorate.storage.feed.FeedDAO;
 import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
 
 import javax.sql.DataSource;
 import java.util.*;
 
 @Component
-public class ReviewStorage {
+public class ReviewDAO implements ReviewStorage {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
-    private final FeedStorage feedStorage;
+    private final FeedDAO feedDAO;
 
     @Autowired
-    public ReviewStorage(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedStorage feedStorage) {
+    public ReviewDAO(JdbcTemplate jdbcTemplate, DataSource dataSource, FeedDAO feedDAO) {
         this.jdbcTemplate = jdbcTemplate;
-        this.feedStorage = feedStorage;
+        this.feedDAO = feedDAO;
         simpleJdbcInsert = new SimpleJdbcInsert(dataSource)
                 .withTableName("\"review\"")
                 .usingGeneratedKeyColumns("id")
                 .usingColumns("content", "is_positive", "user_id", "film_id", "useful");
     }
 
+    @Override
     public Review create(Review review) {
         if (!isUser(review.getUserId()) || !isFilm(review.getFilmId())) {
             throw new ObjectNotFoundException("Невозможно создать отзыв");
@@ -50,42 +52,48 @@ public class ReviewStorage {
                 useful = 0;
             }
             setUseful(useful, review.getId());
-            feedStorage.writeFeed(review.getUserId(), "REVIEW", "ADD", review.getId());
+            feedDAO.writeFeed(review.getUserId(), "REVIEW", "ADD", review.getId());
             return review;
         }
     }
 
+    @Override
     public Review update(Review review) {
         jdbcTemplate.update("UPDATE \"review\" SET CONTENT = ?, IS_POSITIVE = ? WHERE ID = ?",
                 review.getContent(), review.getIsPositive(), review.getId()
         );
         Review review1 = getById(review.getId());
-        feedStorage.writeFeed(review1.getUserId(), "REVIEW", "UPDATE", review.getId());
+        feedDAO.writeFeed(review1.getUserId(), "REVIEW", "UPDATE", review.getId());
         return review1;
     }
 
+    @Override
     public void delete(int id) {
         Review review = getById(id);
-        feedStorage.writeFeed(review.getUserId(), "REVIEW", "REMOVE", review.getId());
+        feedDAO.writeFeed(review.getUserId(), "REVIEW", "REMOVE", review.getId());
         jdbcTemplate.update("DELETE FROM \"review\" WHERE ID = ?", id);
     }
 
+    @Override
     public Review getById(int id) {
         return jdbcTemplate.query("SELECT * FROM \"review\" WHERE ID = ?",
                         new BeanPropertyRowMapper<>(Review.class), id)
                 .stream().findAny().orElseThrow(() -> new ObjectNotFoundException("Несуществующий отзыв"));
     }
 
+    @Override
     public List<Review> getByFilmId(int filmId, int count) {
         return jdbcTemplate.query("SELECT * FROM \"review\" WHERE FILM_ID = ? ORDER BY USEFUL DESC LIMIT ?",
                 new BeanPropertyRowMapper<>(Review.class), filmId, count);
     }
 
+    @Override
     public List<Review> getReviews(int count) {
         return jdbcTemplate.query("SELECT * FROM \"review\" ORDER BY USEFUL DESC LIMIT ?",
                 new BeanPropertyRowMapper<>(Review.class), count);
     }
 
+    @Override
     public void addReaction(int reviewId, int userId, boolean isLike) {
         String sql = "INSERT INTO \"review_like\" (REVIEW_ID, USER_ID, USEFUL) VALUES (?, ?, ?)";
         int useful = 0;
@@ -98,20 +106,24 @@ public class ReviewStorage {
         setUseful(getReactions(reviewId), reviewId);
     }
 
+    @Override
     public void deleteReaction(int reviewId, int userId) {
         jdbcTemplate.update("DELETE FROM \"review_like\" WHERE REVIEW_ID = ? AND USER_ID = ?", reviewId, userId);
         setUseful(getReactions(reviewId), reviewId);
     }
 
+    @Override
     public Integer getReactions(int reviewId) {
         return jdbcTemplate.queryForObject("SELECT SUM(useful) FROM \"review_like\" WHERE REVIEW_ID = ?",
                 Integer.class, reviewId);
     }
 
+    @Override
     public void setUseful(Integer useful, int reviewId) {
         jdbcTemplate.update("UPDATE \"review\" SET USEFUL = ? WHERE ID = ?", useful, reviewId);
     }
 
+    @Override
     public boolean isUser(int userId) {
         Optional<User> user = jdbcTemplate.query(
                         "SELECT * FROM \"user\" WHERE ID = ?",
@@ -120,6 +132,7 @@ public class ReviewStorage {
         return user.isPresent();
     }
 
+    @Override
     public boolean isFilm(int filmId) {
         Optional<Film> film = jdbcTemplate.query(
                 "SELECT * FROM \"film\" AS f " +
