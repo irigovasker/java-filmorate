@@ -24,6 +24,7 @@ public class FilmRowMapper implements RowMapper<Film> {
         film.setDescription(rs.getString("description"));
         film.setDuration(rs.getInt("duration"));
         film.setGenres(filmDAO.getGenres(rs.getInt("id")));
+        film.setDirectors(filmDAO.getDirectors(rs.getInt("id")));
         rating.setId(rs.getInt("rating_id"));
         rating.setName(rs.getString("rating_name"));
         film.setReleaseDate(LocalDate.parse(rs.getString("release_date")));

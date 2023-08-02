@@ -3,7 +3,6 @@ package ru.yandex.practicum.filmorate.util.dao;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.models.Film;
@@ -11,7 +10,6 @@ import ru.yandex.practicum.filmorate.models.Genre;
 import ru.yandex.practicum.filmorate.models.Rating;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.user.Relation;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.time.LocalDate;
@@ -30,7 +28,7 @@ public class StoragesTests {
     static List<User> users;
 
     @Autowired
-    public StoragesTests(@Qualifier("filmDAO") FilmStorage filmStorage, @Qualifier("userDAO") UserStorage userStorage) {
+    public StoragesTests(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -116,6 +114,23 @@ public class StoragesTests {
         List<Film> mostPopular = filmStorage.getMostPopularFilms();
         assertEquals(filmWithId2, mostPopular.get(0));
 
+        //getMostPopularFilms(1)
+        mostPopular = filmStorage.getMostPopularFilms(1);
+        assertEquals(filmWithId2, mostPopular.get(0));
+
+        //getMostPopularFilms(1, 1, 2022)
+        mostPopular = filmStorage.getMostPopularFilms(1, 2, 2021);
+        assertEquals(filmWithId2, mostPopular.get(0));
+        assertEquals(1, mostPopular.size());
+
+        //getMostPopularFilmsByGenre(1)
+        mostPopular = filmStorage.getMostPopularFilmsByGenre(10, 2);
+        assertEquals(filmWithId2, mostPopular.get(0));
+
+        //getMostPopularFilmsByYear(2022)
+        mostPopular = filmStorage.getMostPopularFilmsByYear(10, 2022);
+        assertEquals(filmWithId1, mostPopular.get(0));
+
         //removeLike() and getMostPopularFilms(1)
         filmStorage.removeLike(1, 2);
         filmStorage.removeLike(2, 2);
@@ -138,20 +153,13 @@ public class StoragesTests {
         assertEquals("updateName", userFromDB.getName());
         assertEquals("update@email.com", userFromDB.getEmail());
 
-        //addRelation() and getUserFriends() and getSubscribers()
-        userStorage.addRelation(1, 2);
-        assertEquals(2, userStorage.getUserFriends(1).get(0).getId());
-        assertEquals(1, userStorage.getSubscribers(2).get(0).getId());
-
-        //changeRelationStatus() and getRelation()
-        Relation relation = userStorage.getRelation(1, 2);
-        userStorage.changeRelationStatus(relation, 3);
+        //addFriends() and getUserFriends()
+        userStorage.addFriend(1, 2);
         assertEquals(1, userStorage.getUserFriends(2).get(0).getId());
 
-        //removeRelation()
-        userStorage.removeRelation(relation);
+        //removeFriend()
+        userStorage.removeFriend(1, 2);
         assertEquals(0, userStorage.getUserFriends(1).size());
-        assertEquals(0, userStorage.getUserFriends(2).size());
 
         //removeUser()
         userStorage.removeUser(1);

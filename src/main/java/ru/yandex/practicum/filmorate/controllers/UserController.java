@@ -2,15 +2,14 @@ package ru.yandex.practicum.filmorate.controllers;
 
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.models.Feed;
+import ru.yandex.practicum.filmorate.models.Film;
 import ru.yandex.practicum.filmorate.models.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 import ru.yandex.practicum.filmorate.util.ErrorsUtil;
 import ru.yandex.practicum.filmorate.util.Validator;
-
 
 import javax.validation.Valid;
 import java.util.List;
@@ -20,8 +19,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-
-
 
     @GetMapping
     public List<User> getUsers() {
@@ -65,12 +62,27 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public ResponseEntity<List<User>> getUsersFriends(@PathVariable int id) {
-        return new ResponseEntity<>(userService.getUserFriends(id), HttpStatus.OK);
+    public List<User> getUsersFriends(@PathVariable int id) {
+        return userService.getUserFriends(id);
     }
 
     @GetMapping("/{id}/friends/common/{otherId}")
-    public ResponseEntity<List<User>> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
-        return new ResponseEntity<>(userService.getCommonFriend(id, otherId), HttpStatus.OK);
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return userService.getCommonFriend(id, otherId);
+    }
+
+    @GetMapping("/{userId}/recommendations")
+    public List<Film> showRecommendedFilms(@PathVariable int userId) {
+        return userService.getSimilarUsers(userId);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteUserById(@PathVariable int userId) {
+        userService.deleteUserById(userId);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Feed> getUserFeed(@PathVariable int id) {
+        return userService.getUserFeed(id);
     }
 }

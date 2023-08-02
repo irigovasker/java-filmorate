@@ -1,28 +1,25 @@
 package ru.yandex.practicum.filmorate.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.models.Rating;
-import ru.yandex.practicum.filmorate.storage.RatingDAO;
+import ru.yandex.practicum.filmorate.storage.rating.RatingStorage;
 import ru.yandex.practicum.filmorate.util.ObjectNotFoundException;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class RatingService {
-    private final RatingDAO ratingDAO;
+    private final RatingStorage ratingStorage;
 
-    @Autowired
-    public RatingService(RatingDAO ratingDAO) {
-        this.ratingDAO = ratingDAO;
-    }
 
     public List<Rating> getAllRatings() {
-        return ratingDAO.getAllRatings();
+        return ratingStorage.getAllRatings();
     }
 
     public Rating getRatingById(int id) {
-        Rating rating = ratingDAO.getRatingById(id);
+        Rating rating = ratingStorage.getRatingById(id);
         if (rating == null) {
             throw new ObjectNotFoundException("Несуществующий рейтинг");
         }

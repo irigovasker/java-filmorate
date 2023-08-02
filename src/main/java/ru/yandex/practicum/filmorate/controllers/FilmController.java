@@ -11,7 +11,6 @@ import ru.yandex.practicum.filmorate.util.Validator;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/films")
@@ -19,7 +18,6 @@ import java.util.Optional;
 @Slf4j
 public class FilmController {
     private final FilmService filmService;
-
 
     @GetMapping
     public List<Film> getFilms() {
@@ -62,11 +60,38 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getPopularFilm(@RequestParam(name = "count") Optional<Integer> count) {
-        if (count.isPresent()) {
-            return filmService.getMostPopularFilms(count.get());
+    public List<Film> getPopularFilm(@RequestParam(name = "count", defaultValue = "10") Integer count,
+                                     @RequestParam(name = "genreId", required = false) Integer genreId,
+                                     @RequestParam(name = "year", required = false) Integer year) {
+        return filmService.getMostPopularFilms(count, genreId, year);
+    }
+
+    @GetMapping("/common")
+    public List<Film> getCommonFilms(@RequestParam(name = "userId") int userId,
+                                     @RequestParam(name = "friendId") int friendId) {
+        return filmService.getCommonFilms(userId, friendId);
+    }
+
+    @GetMapping("/director/{id}")
+    public List<Film> getDirectorsFilms(@PathVariable int id, @RequestParam(name = "sortBy") String sortBy) {
+        if (sortBy.equals("year")) {
+            return filmService.getDirectorsFilmsSortByYear(id);
+        } else if (sortBy.equals("likes")) {
+            return filmService.getDirectorsFilmsSortByLikes(id);
         } else {
-            return filmService.getMostPopularFilms();
+            throw new RuntimeException();
         }
+    }
+
+    @GetMapping("/search")
+    public List<Film> search(@RequestParam(name = "query") String query,
+                             @RequestParam(name = "by") String by) {
+        return filmService.search(query, by);
+    }
+
+    @DeleteMapping("/{filmId}")
+    public void deleteFilmById(@PathVariable int filmId) {
+        getFilmById(filmId);
+        filmService.deleteFilmById(filmId);
     }
 }
